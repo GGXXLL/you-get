@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
 import getopt
-import os
 import platform
 import sys
-from .version import script_name, __version__
+
 from .util import git, log
+from .version import script_name, __version__
 
 _options = [
     'help',
@@ -19,6 +19,7 @@ _short_options = 'hVgfl'
 _help = """Usage: {} [OPTION]... [URL]...
 TODO
 """.format(script_name)
+
 
 # TBD
 def main_dev(**kwargs):
@@ -41,8 +42,8 @@ def main_dev(**kwargs):
         # Display help.
         print(_help)
         # Enter GUI mode.
-        #from .gui import gui_main
-        #gui_main()
+        # from .gui import gui_main
+        # gui_main()
     else:
         conf = {}
         for opt, arg in opts:
@@ -84,12 +85,14 @@ def main_dev(**kwargs):
                 from .console import console_main
                 console_main(*args, **conf)
 
+
 def main(**kwargs):
     """Main entry point.
     you-get (legacy)
     """
     from .common import main
     main(**kwargs)
+
 
 if __name__ == '__main__':
     main()
