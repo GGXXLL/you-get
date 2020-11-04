@@ -2,10 +2,13 @@
 
 __all__ = ['douban_download']
 
-import urllib.request, urllib.parse
+import urllib.parse
+import urllib.request
+
 from ..common import *
 
-def douban_download(url, output_dir = '.', merge = True, info_only = False, **kwargs):
+
+def douban_download(url, output_dir='.', merge=True, info_only=False, **kwargs):
     html = get_html(url)
 
     if re.match(r'https?://movie', url):
@@ -16,7 +19,7 @@ def douban_download(url, output_dir = '.', merge = True, info_only = False, **kw
 
         print_info(site_info, title, type, size)
         if not info_only:
-            download_urls([real_url], title, ext, size, output_dir, merge = merge)
+            download_urls([real_url], title, ext, size, output_dir, merge=merge)
 
     elif 'subject' in url:
         titles = re.findall(r'data-title="([^"]*)">', html)
@@ -42,7 +45,7 @@ def douban_download(url, output_dir = '.', merge = True, info_only = False, **kw
 
             if not info_only:
                 try:
-                    download_urls([real_url], title, ext, size, output_dir, merge = merge)
+                    download_urls([real_url], title, ext, size, output_dir, merge=merge)
                 except:
                     pass
 
@@ -58,7 +61,8 @@ def douban_download(url, output_dir = '.', merge = True, info_only = False, **kw
 
             print_info(site_info, title, type, size)
             if not info_only:
-                download_urls([real_url], title, ext, size, output_dir, merge = merge)
+                download_urls([real_url], title, ext, size, output_dir, merge=merge)
+
 
 site_info = "Douban.com"
 download = douban_download

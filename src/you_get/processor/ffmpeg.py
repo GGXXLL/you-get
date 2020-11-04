@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 
 import logging
-import os
 import subprocess
-import sys
-from ..util.strings import parameterize
+
 from ..common import print_more_compatible as print
+from ..util.strings import parameterize
 
 try:
     from subprocess import DEVNULL
@@ -13,8 +12,10 @@ except ImportError:
     # Python 3.2 or below
     import os
     import atexit
+
     DEVNULL = os.open(os.devnull, os.O_RDWR)
     atexit.register(lambda fd: os.close(fd), DEVNULL)
+
 
 def get_usable_ffmpeg(cmd):
     try:
@@ -31,6 +32,7 @@ def get_usable_ffmpeg(cmd):
     except:
         return None
 
+
 FFMPEG, FFPROBE, FFMPEG_VERSION = get_usable_ffmpeg('ffmpeg') or get_usable_ffmpeg('avconv') or (None, None, None)
 if logging.getLogger().isEnabledFor(logging.DEBUG):
     LOGLEVEL = ['-loglevel', 'info']
@@ -39,8 +41,10 @@ else:
     LOGLEVEL = ['-loglevel', 'quiet']
     STDIN = DEVNULL
 
+
 def has_ffmpeg_installed():
     return FFMPEG is not None
+
 
 # Given a list of segments and the output path, generates the concat
 # list and returns the path to the concat list.
@@ -54,6 +58,7 @@ def generate_concat_list(files, output):
                 concat_list.write('file %s\n' % parameterize(relpath))
     return concat_list_path
 
+
 def ffmpeg_concat_av(files, output, ext):
     print('Merging video parts... ', end="", flush=True)
     params = [FFMPEG] + LOGLEVEL
@@ -63,8 +68,10 @@ def ffmpeg_concat_av(files, output, ext):
     params.extend(['--', output])
     if subprocess.call(params, stdin=STDIN):
         print('Merging without re-encode failed.\nTry again re-encoding audio... ', end="", flush=True)
-        try: os.remove(output)
-        except FileNotFoundError: pass
+        try:
+            os.remove(output)
+        except FileNotFoundError:
+            pass
         params = [FFMPEG] + LOGLEVEL
         for file in files:
             if os.path.isfile(file): params.extend(['-i', file])
@@ -79,6 +86,7 @@ def ffmpeg_concat_av(files, output, ext):
     else:
         return 0
 
+
 def ffmpeg_convert_ts_to_mkv(files, output='output.mkv'):
     for file in files:
         if os.path.isfile(file):
@@ -88,6 +96,7 @@ def ffmpeg_convert_ts_to_mkv(files, output='output.mkv'):
             subprocess.call(params, stdin=STDIN)
 
     return
+
 
 def ffmpeg_concat_mp4_to_mpg(files, output='output.mpg'):
     # Use concat demuxer on FFmpeg >= 1.1
@@ -126,6 +135,7 @@ def ffmpeg_concat_mp4_to_mpg(files, output='output.mpg'):
     else:
         raise
 
+
 def ffmpeg_concat_ts_to_mkv(files, output='output.mkv'):
     print('Merging video parts... ', end="", flush=True)
     params = [FFMPEG] + LOGLEVEL + ['-isync', '-y', '-i']
@@ -143,6 +153,7 @@ def ffmpeg_concat_ts_to_mkv(files, output='output.mkv'):
             return False
     except:
         return False
+
 
 def ffmpeg_concat_flv_to_mp4(files, output='output.mp4'):
     print('Merging video parts... ', end="", flush=True)
@@ -185,6 +196,7 @@ def ffmpeg_concat_flv_to_mp4(files, output='output.mp4'):
     else:
         raise
 
+
 def ffmpeg_concat_mp3_to_mp3(files, output='output.mp3'):
     print('Merging video parts... ', end="", flush=True)
 
@@ -197,6 +209,7 @@ def ffmpeg_concat_mp3_to_mp3(files, output='output.mp3'):
     subprocess.call(params)
 
     return True
+
 
 def ffmpeg_concat_mp4_to_mp4(files, output='output.mp4'):
     print('Merging video parts... ', end="", flush=True)
@@ -237,6 +250,7 @@ def ffmpeg_concat_mp4_to_mp4(files, output='output.mp4'):
         os.remove(file + '.ts')
     return True
 
+
 def ffmpeg_download_stream(files, title, ext, params={}, output_dir='.', stream=True):
     """str, str->True
     WARNING: NOT THE SAME PARMS AS OTHER FUNCTIONS!!!!!!
@@ -253,9 +267,9 @@ def ffmpeg_download_stream(files, title, ext, params={}, output_dir='.', stream=
         ffmpeg_params = [FFMPEG] + ['-y', '-re', '-i']
     else:
         ffmpeg_params = [FFMPEG] + ['-y', '-i']
-    ffmpeg_params.append(files)  #not the same here!!!!
+    ffmpeg_params.append(files)  # not the same here!!!!
 
-    if FFMPEG == 'avconv':  #who cares?
+    if FFMPEG == 'avconv':  # who cares?
         ffmpeg_params += ['-c', 'copy']
     else:
         ffmpeg_params += ['-c', 'copy', '-bsf:a', 'aac_adtstoasc']
@@ -271,7 +285,7 @@ def ffmpeg_download_stream(files, title, ext, params={}, output_dir='.', stream=
     print(' '.join(ffmpeg_params))
 
     try:
-        a = subprocess.Popen(ffmpeg_params, stdin= subprocess.PIPE)
+        a = subprocess.Popen(ffmpeg_params, stdin=subprocess.PIPE)
         a.communicate()
     except KeyboardInterrupt:
         try:

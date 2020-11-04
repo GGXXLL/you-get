@@ -2,8 +2,9 @@
 
 __all__ = ['nanagogo_download']
 
-from ..common import *
 from .universal import *
+from ..common import *
+
 
 def nanagogo_download(url, output_dir='.', merge=True, info_only=False, **kwargs):
     if re.match(r'https?://stat.7gogo.jp', url):
@@ -24,22 +25,22 @@ def nanagogo_download(url, output_dir='.', merge=True, info_only=False, **kwargs
     for i in info['data']['posts']['post']['body']:
         if 'image' in i:
             image_url = i['image']
-            if image_url[:2] == '//': continue # skip stamp images
+            if image_url[:2] == '//': continue  # skip stamp images
             _, ext, size = url_info(image_url)
             items.append({'title': title,
-                          'url':   image_url,
-                          'ext':   ext,
-                          'size':  size})
+                          'url': image_url,
+                          'ext': ext,
+                          'size': size})
         elif 'movieUrlHq' in i:
             movie_url = i['movieUrlHq']
             _, ext, size = url_info(movie_url)
             items.append({'title': title,
-                          'url':   movie_url,
-                          'ext':   ext,
-                          'size':  size})
+                          'url': movie_url,
+                          'ext': ext,
+                          'size': size})
 
     size = sum([i['size'] for i in items])
-    if size == 0: return # do not fail the whole process
+    if size == 0: return  # do not fail the whole process
     print_info(site_info, title, ext, size)
     if not info_only:
         for i in items:
@@ -47,6 +48,7 @@ def nanagogo_download(url, output_dir='.', merge=True, info_only=False, **kwargs
             download_urls([i['url']], i['title'], i['ext'], i['size'],
                           output_dir=output_dir,
                           merge=merge)
+
 
 site_info = "7gogo.jp"
 download = nanagogo_download

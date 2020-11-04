@@ -4,6 +4,7 @@ __all__ = ['heavymusic_download']
 
 from ..common import *
 
+
 def heavymusic_download(url, output_dir='.', merge=True, info_only=False, **kwargs):
     html = get_html(url)
     tracks = re.findall(r'href="(online2\.php[^"]+)"', html)
@@ -17,6 +18,7 @@ def heavymusic_download(url, output_dir='.', merge=True, info_only=False, **kwar
         print_info(site_info, title, 'mp3', size)
         if not info_only:
             download_urls([file_url], title[:-4], 'mp3', size, output_dir, merge=merge)
+
 
 site_info = "heavy-music.ru"
 download = heavymusic_download

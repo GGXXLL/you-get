@@ -2,9 +2,9 @@
 
 __all__ = ['twitter_download']
 
-from ..common import *
 from .universal import *
-from .vine import vine_download
+from ..common import *
+
 
 def extract_m3u(source):
     r1 = get_content(source)
@@ -15,15 +15,16 @@ def extract_m3u(source):
     s2 += re.findall(r'(/amplify_video/.*)', r2)
     return ['https://video.twimg.com%s' % i for i in s2]
 
+
 def twitter_download(url, output_dir='.', merge=True, info_only=False, **kwargs):
     if re.match(r'https?://pbs\.twimg\.com', url):
         universal_download(url, output_dir, merge=merge, info_only=info_only, **kwargs)
         return
 
-    if re.match(r'https?://mobile', url): # normalize mobile URL
+    if re.match(r'https?://mobile', url):  # normalize mobile URL
         url = 'https://' + match1(url, r'//mobile\.(.+)')
 
-    if re.match(r'https?://twitter\.com/i/moments/', url): # moments
+    if re.match(r'https?://twitter\.com/i/moments/', url):  # moments
         html = get_html(url, faker=True)
         paths = re.findall(r'data-permalink-path="([^"]+)"', html)
         for path in paths:
@@ -34,11 +35,11 @@ def twitter_download(url, output_dir='.', merge=True, info_only=False, **kwargs)
                              **kwargs)
         return
 
-    html = get_html(url, faker=False) # disable faker to prevent 302 infinite redirect
+    html = get_html(url, faker=False)  # disable faker to prevent 302 infinite redirect
     screen_name = r1(r'twitter\.com/([^/]+)', url) or r1(r'data-screen-name="([^"]*)"', html) or \
-        r1(r'<meta name="twitter:title" content="([^"]*)"', html)
+                  r1(r'<meta name="twitter:title" content="([^"]*)"', html)
     item_id = r1(r'twitter\.com/[^/]+/status/(\d+)', url) or r1(r'data-item-id="([^"]*)"', html) or \
-        r1(r'<meta name="twitter:site:id" content="([^"]*)"', html)
+              r1(r'<meta name="twitter:site:id" content="([^"]*)"', html)
     page_title = "{} [{}]".format(screen_name, item_id)
 
     authorization = 'Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA'
@@ -80,7 +81,7 @@ def twitter_download(url, output_dir='.', merge=True, info_only=False, **kwargs)
             # FIXME: we're assuming one tweet only contains one video here
             variants = medium['video_info']['variants']
             variants = sorted(variants, key=lambda kv: kv.get('bitrate', 0))
-            urls = [ variants[-1]['url'] ]
+            urls = [variants[-1]['url']]
             size = urls_size(urls)
             mime, ext = variants[-1]['content_type'], 'mp4'
 
@@ -90,7 +91,7 @@ def twitter_download(url, output_dir='.', merge=True, info_only=False, **kwargs)
 
         else:
             title = item_id + '_' + medium['media_url_https'].split('.')[-2].split('/')[-1]
-            urls = [ medium['media_url_https'] + ':orig' ]
+            urls = [medium['media_url_https'] + ':orig']
             size = urls_size(urls)
             ext = medium['media_url_https'].split('.')[-1]
 

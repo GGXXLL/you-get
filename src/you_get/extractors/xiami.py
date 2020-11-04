@@ -3,16 +3,18 @@
 
 __all__ = ['xiami_download']
 
-from ..common import *
+from urllib import parse
 
 from xml.dom.minidom import parseString
-from urllib import parse
+
+from ..common import *
+
 
 def location_dec(str):
     head = int(str[0])
     str = str[1:]
     rows = head
-    cols = int(len(str)/rows) + 1
+    cols = int(len(str) / rows) + 1
 
     out = ""
     full_row = len(str) % head
@@ -21,11 +23,12 @@ def location_dec(str):
             if c == (cols - 1) and r >= full_row:
                 continue
             if r < full_row:
-                char = str[r*cols+c]
+                char = str[r * cols + c]
             else:
-                char = str[cols*full_row+(r-full_row)*(cols-1)+c]
+                char = str[cols * full_row + (r - full_row) * (cols - 1) + c]
             out += char
     return parse.unquote(out).replace("^", "0")
+
 
 def xiami_download_lyric(lrc_url, file_name, output_dir):
     lrc = get_content(lrc_url, headers=fake_headers)
@@ -34,8 +37,8 @@ def xiami_download_lyric(lrc_url, file_name, output_dir):
         with open(output_dir + "/" + filename + '.lrc', 'w', encoding='utf-8') as x:
             x.write(lrc)
 
+
 def xiami_download_pic(pic_url, file_name, output_dir):
-    from ..util.strings import get_filename
     pic_url = pic_url.replace('_1', '')
     pos = pic_url.rfind('.')
     ext = pic_url[pos:]
@@ -44,7 +47,8 @@ def xiami_download_pic(pic_url, file_name, output_dir):
         with open(output_dir + "/" + file_name.replace('/', '-') + ext, 'wb') as x:
             x.write(pic)
 
-def xiami_download_song(sid, output_dir = '.', info_only = False):
+
+def xiami_download_song(sid, output_dir='.', info_only=False):
     xml = get_content('http://www.xiami.com/song/playlist/id/%s/object_name/default/object_id/0' % sid, headers=fake_headers)
     doc = parseString(xml)
     i = doc.getElementsByTagName("track")[0]
@@ -69,17 +73,18 @@ def xiami_download_song(sid, output_dir = '.', info_only = False):
         except:
             pass
 
-def xiami_download_showcollect(cid, output_dir = '.', info_only = False):
+
+def xiami_download_showcollect(cid, output_dir='.', info_only=False):
     html = get_content('http://www.xiami.com/song/showcollect/id/' + cid, headers=fake_headers)
     collect_name = r1(r'<title>(.*)</title>', html)
 
     xml = get_content('http://www.xiami.com/song/playlist/id/%s/type/3' % cid, headers=fake_headers)
     doc = parseString(xml)
-    output_dir =  output_dir + "/" + "[" + collect_name + "]"
+    output_dir = output_dir + "/" + "[" + collect_name + "]"
     tracks = doc.getElementsByTagName("track")
     track_nr = 1
     for i in tracks:
-        artist=album_name=song_title=url=""
+        artist = album_name = song_title = url = ""
         try:
             song_id = i.getElementsByTagName("song_id")[0].firstChild.nodeValue
             artist = i.getElementsByTagName("artist")[0].firstChild.nodeValue
@@ -108,6 +113,7 @@ def xiami_download_showcollect(cid, output_dir = '.', info_only = False):
 
         track_nr += 1
 
+
 def xiami_download_album(aid, output_dir='.', info_only=False):
     xml = get_content('http://www.xiami.com/song/playlist/id/%s/type/1' % aid, headers=fake_headers)
     album_name = r1(r'<album_name><!\[CDATA\[(.*)\]\]>', xml)
@@ -119,8 +125,8 @@ def xiami_download_album(aid, output_dir='.', info_only=False):
     track_nr = 1
     pic_exist = False
     for i in tracks:
-#in this xml track tag is used for both "track in a trackList" and track no
-#dirty here
+        # in this xml track tag is used for both "track in a trackList" and track no
+        # dirty here
         if i.firstChild.nodeValue is not None:
             continue
         song_title = i.getElementsByTagName("songName")[0].firstChild.nodeValue
@@ -148,6 +154,7 @@ def xiami_download_album(aid, output_dir='.', info_only=False):
                 pic_exist = True
 
         track_nr += 1
+
 
 def xiami_download_mv(url, output_dir='.', merge=True, info_only=False):
     # FIXME: broken merge
@@ -179,8 +186,9 @@ def xiami_download_mv(url, output_dir='.', merge=True, info_only=False):
     if not info_only:
         download_urls(v_urls, title, ext, total_size, output_dir, merge=merge, headers=fake_headers)
 
+
 def xiami_download(url, output_dir='.', merge=True, info_only=False, **kwargs):
-#albums
+    # albums
     if re.match(r'http://www.xiami.com/album/\d+', url):
         id = r1(r'http://www.xiami.com/album/(\d+)', url)
         xiami_download_album(id, output_dir, info_only)
@@ -189,12 +197,12 @@ def xiami_download(url, output_dir='.', merge=True, info_only=False, **kwargs):
         album_id = re.search(r'rel="canonical"\s+href="http://www.xiami.com/album/([^"]+)"', page).group(1)
         xiami_download_album(album_id, output_dir, info_only)
 
-#collections
+    # collections
     if re.match(r'http://www.xiami.com/collect/\d+', url):
         id = r1(r'http://www.xiami.com/collect/(\d+)', url)
         xiami_download_showcollect(id, output_dir, info_only)
 
-#single track
+    # single track
     if re.match(r'http://www.xiami.com/song/\d+\b', url):
         id = r1(r'http://www.xiami.com/song/(\d+)', url)
         xiami_download_song(id, output_dir, info_only)
@@ -209,6 +217,7 @@ def xiami_download(url, output_dir='.', merge=True, info_only=False, **kwargs):
 
     if re.match('http://www.xiami.com/mv', url):
         xiami_download_mv(url, output_dir, merge=merge, info_only=info_only)
+
 
 site_info = "Xiami.com"
 download = xiami_download

@@ -4,6 +4,7 @@ __all__ = ['tiktok_download']
 
 from ..common import *
 
+
 def tiktok_download(url, output_dir='.', merge=True, info_only=False, **kwargs):
     referUrl = url.split('?')[0]
     headers = fake_headers
@@ -41,6 +42,7 @@ def tiktok_download(url, output_dir='.', merge=True, info_only=False, **kwargs):
     print_info(site_info, title, mime, size)
     if not info_only:
         download_urls([videoUrl], title, ext, size, output_dir=output_dir, merge=merge, headers=headers)
+
 
 site_info = "TikTok.com"
 download = tiktok_download

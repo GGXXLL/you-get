@@ -2,11 +2,12 @@
 
 __all__ = ['miaopai_download']
 
-import string
 import random
-from ..common import *
+import string
 import urllib.error
 import urllib.parse
+
+from ..common import *
 from ..util import fs
 
 fake_headers_mobile = {
@@ -17,7 +18,8 @@ fake_headers_mobile = {
     'User-Agent': 'Mozilla/5.0 (Linux; Android 4.4.2; Nexus 4 Build/KOT49H) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847.114 Mobile Safari/537.36'
 }
 
-def miaopai_download_by_fid(fid, output_dir = '.', merge = False, info_only = False, **kwargs):
+
+def miaopai_download_by_fid(fid, output_dir='.', merge=False, info_only=False, **kwargs):
     '''Source: Android mobile'''
     page_url = 'http://video.weibo.com/show?fid=' + fid + '&type=mp4'
 
@@ -113,9 +115,9 @@ def miaopai_download(url, output_dir='.', merge=False, info_only=False, **kwargs
         miaopai_download_by_fid(fid, output_dir, merge, info_only)
     elif '/p/230444' in url:
         fid = match1(url, r'/p/230444(\w+)')
-        miaopai_download_by_fid('1034:'+fid, output_dir, merge, info_only)
+        miaopai_download_by_fid('1034:' + fid, output_dir, merge, info_only)
     else:
-        mobile_page = get_content(url, headers = fake_headers_mobile)
+        mobile_page = get_content(url, headers=fake_headers_mobile)
         hit = re.search(r'"page_url"\s*:\s*"([^"]+)"', mobile_page)
         if not hit:
             raise Exception('Unknown pattern')

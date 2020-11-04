@@ -56,7 +56,8 @@ def decode(data):
 
 
 def video_info(vid, **kwargs):
-    url = 'http://player-pc.le.com/mms/out/video/playJson?id={}&platid=1&splatid=105&format=1&tkey={}&domain=www.le.com&region=cn&source=1000&accesyx=1'.format(vid, calcTimeKey(int(time.time())))
+    url = 'http://player-pc.le.com/mms/out/video/playJson?id={}&platid=1&splatid=105&format=1&tkey={}&domain=www.le.com&region=cn&source=1000&accesyx=1'.format(
+        vid, calcTimeKey(int(time.time())))
     r = get_content(url, decoded=False)
     info = json.loads(str(r, "utf-8"))
     info = info['msgs']
@@ -110,13 +111,15 @@ def letvcloud_download_by_vu(vu, uu, title=None, output_dir='.', merge=True, inf
     sign_key = '2f9d6924b33a165a6d8b5d3d42f4f987'  # ALL YOUR BASE ARE BELONG TO US
     str2Hash = ''.join([i + argumet_dict[i] for i in sorted(argumet_dict)]) + sign_key
     sign = hashlib.md5(str2Hash.encode('utf-8')).hexdigest()
-    request_info = urllib.request.Request('http://api.letvcloud.com/gpc.php?' + '&'.join([i + '=' + argumet_dict[i] for i in argumet_dict]) + '&sign={sign}'.format(sign=sign))
+    request_info = urllib.request.Request(
+        'http://api.letvcloud.com/gpc.php?' + '&'.join([i + '=' + argumet_dict[i] for i in argumet_dict]) + '&sign={sign}'.format(sign=sign))
     response = urllib.request.urlopen(request_info)
     data = response.read()
     info = json.loads(data.decode('utf-8'))
     type_available = []
     for video_type in info['data']['video_info']['media']:
-        type_available.append({'video_url': info['data']['video_info']['media'][video_type]['play_url']['main_url'], 'video_quality': int(info['data']['video_info']['media'][video_type]['play_url']['vtype'])})
+        type_available.append({'video_url': info['data']['video_info']['media'][video_type]['play_url']['main_url'],
+                               'video_quality': int(info['data']['video_info']['media'][video_type]['play_url']['vtype'])})
     urls = [base64.b64decode(sorted(type_available, key=lambda x: x['video_quality'])[-1]['video_url']).decode("utf-8")]
     size = urls_size(urls)
     ext = 'mp4'

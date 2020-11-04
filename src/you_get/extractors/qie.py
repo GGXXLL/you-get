@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from json import loads
+
 from ..common import *
 from ..extractor import VideoExtractor
-from ..util.log import *
 
-from json import loads
 
 class QiE(VideoExtractor):
     name = "QiE （企鹅直播）"
@@ -16,9 +16,9 @@ class QiE(VideoExtractor):
         {'id': 'middle', 'container': 'flv', 'video_profile': '550'},
         {'id': 'middle2', 'container': 'flv', 'video_profile': '900'},
     ]
-    
-    id_dic = {i['video_profile']:(i['id']) for i in stream_types}
-    
+
+    id_dic = {i['video_profile']: (i['id']) for i in stream_types}
+
     api_endpoint = 'http://www.qie.tv/api/v1/room/{room_id}'
     game_ep = 'http://live.qq.com/game/game_details/get_game_details_info/'
 
@@ -53,18 +53,18 @@ class QiE(VideoExtractor):
     def prepare(self, **kwargs):
         if self.url:
             self.vid = self.get_vid_from_url(self.url)
-        
-        content = get_content(self.api_endpoint.format(room_id = self.vid))
+
+        content = get_content(self.api_endpoint.format(room_id=self.vid))
         content = loads(content)
         self.title = content['data']['room_name']
-        rtmp_url =  content['data']['rtmp_url']
-        #stream_available = [i['name'] for i in content['data']['stream']]
+        rtmp_url = content['data']['rtmp_url']
+        # stream_available = [i['name'] for i in content['data']['stream']]
         stream_available = {}
         stream_available['normal'] = rtmp_url + '/' + content['data']['rtmp_live']
         if len(content['data']['rtmp_multi_bitrate']) > 0:
-            for k , v in content['data']['rtmp_multi_bitrate'].items():
+            for k, v in content['data']['rtmp_multi_bitrate'].items():
                 stream_available[k] = rtmp_url + '/' + v
-        
+
         for s in self.stream_types:
             if s['id'] in stream_available.keys():
                 quality_id = s['id']
@@ -92,6 +92,7 @@ class QiE(VideoExtractor):
             # Extract stream with the best quality
             stream_id = self.streams_sorted[0]['id']
             s['src'] = [s['url']]
+
 
 site = QiE()
 download = site.download_by_url

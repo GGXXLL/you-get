@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 __all__ = ['iwara_download']
+
 from ..common import *
+
 headers = {
     'DNT': '1',
     'Accept-Encoding': 'gzip, deflate, sdch, br',
@@ -11,13 +13,15 @@ headers = {
     'Cache-Control': 'max-age=0',
     'Connection': 'keep-alive',
     'Save-Data': 'on',
-    'Cookie':'has_js=1;show_adult=1',
+    'Cookie': 'has_js=1;show_adult=1',
 }
 stream_types = [
-        {'id': 'Source',      'container': 'mp4', 'video_profile': '原始'},
-        {'id': '540p',    'container': 'mp4', 'video_profile': '540p'},
-        {'id': '360p',   'container': 'mp4', 'video_profile': '360P'},
-    ]
+    {'id': 'Source', 'container': 'mp4', 'video_profile': '原始'},
+    {'id': '540p', 'container': 'mp4', 'video_profile': '540p'},
+    {'id': '360p', 'container': 'mp4', 'video_profile': '360P'},
+]
+
+
 def iwara_download(url, output_dir='.', merge=True, info_only=False, **kwargs):
     global headers
     video_hash = match1(url, r'https?://\w+.iwara.tv/videos/(\w+)')
@@ -29,22 +33,25 @@ def iwara_download(url, output_dir='.', merge=True, info_only=False, **kwargs):
     data = json.loads(content)
     down_urls = 'https:' + data[0]['uri']
     type, ext, size = url_info(down_urls, headers=headers)
-    print_info(site_info, title+data[0]['resolution'], type, size)
+    print_info(site_info, title + data[0]['resolution'], type, size)
 
     if not info_only:
         download_urls([down_urls], title, ext, size, output_dir, merge=merge, headers=headers)
 
-def download_playlist_by_url( url, **kwargs):
+
+def download_playlist_by_url(url, **kwargs):
     video_page = get_content(url)
     # url_first=re.findall(r"(http[s]?://[^/]+)",url)
-    url_first=match1(url, r"(http[s]?://[^/]+)")
+    url_first = match1(url, r"(http[s]?://[^/]+)")
     # print (url_first)
     videos = set(re.findall(r'<a href="(/videos/[^"]+)"', video_page))
-    if(len(videos)>0):
+    if (len(videos) > 0):
         for video in videos:
-            iwara_download(url_first+video, **kwargs)
+            iwara_download(url_first + video, **kwargs)
     else:
         maybe_print('this page not found any videos')
+
+
 site_info = "Iwara"
 download = iwara_download
 download_playlist = download_playlist_by_url

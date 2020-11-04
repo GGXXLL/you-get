@@ -3,9 +3,8 @@
 
 __all__ = ['baidu_download']
 
-from ..common import *
 from .embed import *
-from .universal import *
+from ..common import *
 
 
 def baidu_get_song_data(sid):
@@ -103,7 +102,6 @@ def baidu_download_album(aid, output_dir='.', merge=True, info_only=False):
 
 
 def baidu_download(url, output_dir='.', stream_type=None, merge=True, info_only=False, **kwargs):
-
     if re.match(r'https?://pan.baidu.com', url):
         real_url, title, ext, size = baidu_pan_download(url)
         print_info('BaiduPan', title, ext, size)
@@ -130,7 +128,7 @@ def baidu_download(url, output_dir='.', stream_type=None, merge=True, info_only=
             title = r1(r'title:"([^"]+)"', html)
 
             vhsrc = re.findall(r'"BDE_Image"[^>]+src="([^"]+\.mp4)"', html) or \
-                re.findall(r'vhsrc="([^"]+)"', html)
+                    re.findall(r'vhsrc="([^"]+)"', html)
             if len(vhsrc) > 0:
                 ext = 'mp4'
                 size = url_size(vhsrc[0])
@@ -321,6 +319,7 @@ def dict2triplet(dictin):
     for i in dictin:
         out_triplet.append((i, dictin[i]))
     return out_triplet
+
 
 site_info = "Baidu.com"
 download = baidu_download

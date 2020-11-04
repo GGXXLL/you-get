@@ -4,13 +4,14 @@ __all__ = ['zhibo_download']
 
 from ..common import *
 
-def zhibo_vedio_download(url, output_dir = '.', merge = True, info_only = False, **kwargs):
+
+def zhibo_vedio_download(url, output_dir='.', merge=True, info_only=False, **kwargs):
     # http://video.zhibo.tv/video/details/d103057f-663e-11e8-9d83-525400ccac43.html
 
     html = get_html(url)
     title = r1(r'<title>([\s\S]*)</title>', html)
     total_size = 0
-    part_urls= []
+    part_urls = []
 
     video_html = r1(r'<script type="text/javascript">([\s\S]*)</script></head>', html)
 
@@ -24,7 +25,7 @@ def zhibo_vedio_download(url, output_dir = '.', merge = True, info_only = False,
         download_urls(part_urls, title, ext, total_size, output_dir=output_dir, merge=merge)
 
 
-def zhibo_download(url, output_dir = '.', merge = True, info_only = False, **kwargs):
+def zhibo_download(url, output_dir='.', merge=True, info_only=False, **kwargs):
     if 'video.zhibo.tv' in url:
         zhibo_vedio_download(url, output_dir=output_dir, merge=merge, info_only=info_only, **kwargs)
         return
@@ -49,6 +50,7 @@ def zhibo_download(url, output_dir = '.', merge = True, info_only = False, **kwa
     print_info(site_info, title, 'flv', float('inf'))
     if not info_only:
         download_url_ffmpeg(real_url, title, 'flv', params={}, output_dir=output_dir, merge=merge)
+
 
 site_info = "zhibo.tv"
 download = zhibo_download

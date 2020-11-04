@@ -2,59 +2,54 @@ __all__ = ['embed_download']
 
 import urllib.parse
 
-from ..common import *
-
+from . import bokecc
+from . import iqiyi
 from .bilibili import bilibili_download
 from .dailymotion import dailymotion_download
 from .iqiyi import iqiyi_download_by_vid
-from .le import letvcloud_download_by_vu
 from .netease import netease_download
-from .qq import qq_download_by_vid
-from .sina import sina_download_by_vid
 from .tudou import tudou_download_by_id
 from .vimeo import vimeo_download_by_id
 from .yinyuetai import yinyuetai_download_by_id
 from .youku import youku_download_by_vid
-from . import iqiyi
-from . import bokecc
+from ..common import *
 
 """
 refer to http://open.youku.com/tools
 """
-youku_embed_patterns = [ 'youku\.com/v_show/id_([a-zA-Z0-9=]+)',
-                         'player\.youku\.com/player\.php/sid/([a-zA-Z0-9=]+)/v\.swf',
-                         'loader\.swf\?VideoIDS=([a-zA-Z0-9=]+)',
-                         'player\.youku\.com/embed/([a-zA-Z0-9=]+)',
-                         'YKU.Player\(\'[a-zA-Z0-9]+\',{ client_id: \'[a-zA-Z0-9]+\', vid: \'([a-zA-Z0-9]+)\''
-                       ]
+youku_embed_patterns = ['youku\.com/v_show/id_([a-zA-Z0-9=]+)',
+                        'player\.youku\.com/player\.php/sid/([a-zA-Z0-9=]+)/v\.swf',
+                        'loader\.swf\?VideoIDS=([a-zA-Z0-9=]+)',
+                        'player\.youku\.com/embed/([a-zA-Z0-9=]+)',
+                        'YKU.Player\(\'[a-zA-Z0-9]+\',{ client_id: \'[a-zA-Z0-9]+\', vid: \'([a-zA-Z0-9]+)\''
+                        ]
 
 """
 http://www.tudou.com/programs/view/html5embed.action?type=0&amp;code=3LS_URGvl54&amp;lcode=&amp;resourceId=0_06_05_99
 """
-tudou_embed_patterns = [ 'tudou\.com[a-zA-Z0-9\/\?=\&\.\;]+code=([a-zA-Z0-9_-]+)\&',
-                         'www\.tudou\.com/v/([a-zA-Z0-9_-]+)/[^"]*v\.swf'
-                       ]
+tudou_embed_patterns = ['tudou\.com[a-zA-Z0-9\/\?=\&\.\;]+code=([a-zA-Z0-9_-]+)\&',
+                        'www\.tudou\.com/v/([a-zA-Z0-9_-]+)/[^"]*v\.swf'
+                        ]
 
 """
 refer to http://open.tudou.com/wiki/video/info
 """
-tudou_api_patterns = [ ]
+tudou_api_patterns = []
 
-yinyuetai_embed_patterns = [ 'player\.yinyuetai\.com/video/swf/(\d+)' ]
+yinyuetai_embed_patterns = ['player\.yinyuetai\.com/video/swf/(\d+)']
 
-iqiyi_embed_patterns = [ 'player\.video\.qiyi\.com/([^/]+)/[^/]+/[^/]+/[^/]+\.swf[^"]+tvId=(\d+)' ]
+iqiyi_embed_patterns = ['player\.video\.qiyi\.com/([^/]+)/[^/]+/[^/]+/[^/]+\.swf[^"]+tvId=(\d+)']
 
-netease_embed_patterns = [ '(http://\w+\.163\.com/movie/[^\'"]+)' ]
+netease_embed_patterns = ['(http://\w+\.163\.com/movie/[^\'"]+)']
 
-vimeo_embed_patters = [ 'player\.vimeo\.com/video/(\d+)' ]
+vimeo_embed_patters = ['player\.vimeo\.com/video/(\d+)']
 
-dailymotion_embed_patterns = [ 'www\.dailymotion\.com/embed/video/(\w+)' ]
+dailymotion_embed_patterns = ['www\.dailymotion\.com/embed/video/(\w+)']
 
 """
 check the share button on http://www.bilibili.com/video/av5079467/
 """
-bilibili_embed_patterns = [ 'static\.hdslb\.com/miniloader\.swf.*aid=(\d+)' ]
-
+bilibili_embed_patterns = ['static\.hdslb\.com/miniloader\.swf.*aid=(\d+)']
 
 '''
 http://open.iqiyi.com/lib/player.html
@@ -67,7 +62,7 @@ bokecc_patterns = [r'bokecc\.com/flash/pocle/player\.swf\?siteid=(.+?)&vid=(.{32
 recur_limit = 3
 
 
-def embed_download(url, output_dir = '.', merge = True, info_only = False, **kwargs):
+def embed_download(url, output_dir='.', merge=True, info_only=False, **kwargs):
     content = get_content(url, headers=fake_headers)
     found = False
     title = match1(content, '<title>([^<>]+)</title>')
@@ -147,6 +142,7 @@ def embed_download(url, output_dir = '.', merge = True, info_only = False, **kwa
         raise NotImplementedError(url)
     else:
         return found
+
 
 site_info = "any.any"
 download = embed_download

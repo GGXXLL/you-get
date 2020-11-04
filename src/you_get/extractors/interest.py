@@ -1,13 +1,15 @@
 #!/usr/bin/env python
 
-from ..common import *
 from json import loads
 
+from ..common import *
+
+
 def interest_download(url, output_dir='.', merge=True, info_only=False, **kwargs):
-    #http://ch.interest.me/zhtv/VOD/View/114789
-    #http://program.interest.me/zhtv/sonja/8/Vod/View/15794
+    # http://ch.interest.me/zhtv/VOD/View/114789
+    # http://program.interest.me/zhtv/sonja/8/Vod/View/15794
     html = get_content(url)
-    #get title
+    # get title
     title = match1(html, r'<meta property="og:title" content="([^"]*)"')
     title = title.split('&')[0].strip()
     info_url = match1(html, r'data: "(.+)",')
@@ -26,6 +28,7 @@ def interest_download(url, output_dir='.', merge=True, info_only=False, **kwargs
     print_info(site_info, title, type, size)
     if not info_only:
         download_rtmp_url(url=serverurl, title=title, ext=ext, output_dir=output_dir)
+
 
 site_info = "interest.me"
 download = interest_download

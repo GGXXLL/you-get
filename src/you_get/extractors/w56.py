@@ -2,13 +2,13 @@
 
 __all__ = ['w56_download', 'w56_download_by_id']
 
-from ..common import *
-
-from .sohu import sohu_download
-
 import json
 
-def w56_download_by_id(id, title = None, output_dir = '.', merge = True, info_only = False):
+from .sohu import sohu_download
+from ..common import *
+
+
+def w56_download_by_id(id, title=None, output_dir='.', merge=True, info_only=False):
     content = json.loads(get_html('http://vxml.56.com/json/%s/?src=site' % id))
     info = content['info']
     title = title or info['Subject']
@@ -24,9 +24,10 @@ def w56_download_by_id(id, title = None, output_dir = '.', merge = True, info_on
 
     print_info(site_info, title, ext, size)
     if not info_only:
-        download_urls([url], title, ext, size, output_dir = output_dir, merge = merge)
+        download_urls([url], title, ext, size, output_dir=output_dir, merge=merge)
 
-def w56_download(url, output_dir = '.', merge = True, info_only = False, **kwargs):
+
+def w56_download(url, output_dir='.', merge=True, info_only=False, **kwargs):
     content = get_content(url)
     sohu_url = r1(r"url:\s*'([^']*)'", content)
     if sohu_url:
@@ -35,7 +36,8 @@ def w56_download(url, output_dir = '.', merge = True, info_only = False, **kwarg
 
     id = r1(r'http://www.56.com/u\d+/v_(\w+).html', url) or \
          r1(r'http://www.56.com/.*vid-(\w+).html', url)
-    w56_download_by_id(id, output_dir = output_dir, merge = merge, info_only = info_only)
+    w56_download_by_id(id, output_dir=output_dir, merge=merge, info_only=info_only)
+
 
 site_info = "56.com"
 download = w56_download

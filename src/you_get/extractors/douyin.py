@@ -1,7 +1,7 @@
 # coding=utf-8
 
-import re
 import json
+import re
 
 from ..common import (
     url_size,
@@ -11,7 +11,6 @@ from ..common import (
     download_urls,
     playlist_not_supported,
 )
-
 
 __all__ = ['douyin_download_by_url']
 

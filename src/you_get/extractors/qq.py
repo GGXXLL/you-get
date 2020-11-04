@@ -12,7 +12,6 @@ headers = {
 
 
 def qq_download_by_vid(vid, title, output_dir='.', merge=True, info_only=False):
-
     # http://v.sports.qq.com/#/cover/t0fqsm1y83r8v5j/a0026nvw5jr https://v.qq.com/x/cover/t0fqsm1y83r8v5j/a0026nvw5jr.html
     video_json = None
     platforms = [4100201, 11]
@@ -20,7 +19,7 @@ def qq_download_by_vid(vid, title, output_dir='.', merge=True, info_only=False):
         info_api = 'http://vv.video.qq.com/getinfo?otype=json&appver=3.2.19.333&platform={}&defnpayver=1&defn=shd&vid={}'.format(platform, vid)
         info = get_content(info_api, headers)
         video_json = json.loads(match1(info, r'QZOutputJson=(.*)')[:-1])
-        if not video_json.get('msg')=='cannot play outside':
+        if not video_json.get('msg') == 'cannot play outside':
             break
     fn_pre = video_json['vl']['vi'][0]['lnk']
     title = video_json['vl']['vi'][0]['ti']
@@ -33,9 +32,9 @@ def qq_download_by_vid(vid, title, output_dir='.', merge=True, info_only=False):
     else:
         fn_pre, magic_str, video_type = filename.split('.')
 
-    part_urls= []
+    part_urls = []
     total_size = 0
-    for part in range(1, seg_cnt+1):
+    for part in range(1, seg_cnt + 1):
         if fc_cnt == 0:
             # fix json parsing error
             # example:https://v.qq.com/x/page/w0674l9yrrh.html
@@ -70,6 +69,7 @@ def qq_download_by_vid(vid, title, output_dir='.', merge=True, info_only=False):
     print_info(site_info, title, ext, total_size)
     if not info_only:
         download_urls(part_urls, title, ext, total_size, output_dir=output_dir, merge=merge)
+
 
 def kg_qq_download_by_shareid(shareid, output_dir='.', info_only=False, caption=False):
     BASE_URL = 'http://cgi.kg.qq.com/fcgi-bin/kg_ugc_getdetail'
@@ -109,6 +109,7 @@ def kg_qq_download_by_shareid(shareid, output_dir='.', info_only=False, caption=
                     f.write(line)
                     f.write('\n')
 
+
 def qq_download(url, output_dir='.', merge=True, info_only=False, **kwargs):
     """"""
 
@@ -142,8 +143,8 @@ def qq_download(url, output_dir='.', merge=True, info_only=False, **kwargs):
         nid = match1(url, r'/s/([^/&?#]+)')
         content = get_content('https://kuaibao.qq.com/getVideoRelate?id=' + nid)
         info_json = json.loads(content)
-        vid=info_json['videoinfo']['vid']
-        title=info_json['videoinfo']['title']
+        vid = info_json['videoinfo']['vid']
+        title = info_json['videoinfo']['title']
     elif 'kuaibao.qq.com' in url or re.match(r'http://daxue.qq.com/content/content/id/\d+', url):
         # http://daxue.qq.com/content/content/id/2321
         content = get_content(url, headers)
@@ -161,25 +162,25 @@ def qq_download(url, output_dir='.', merge=True, info_only=False, **kwargs):
         title = match1(content, r'"title":"(\w+)"')
     else:
         content = get_content(url, headers)
-        #vid = parse_qs(urlparse(url).query).get('vid') #for links specified vid  like http://v.qq.com/cover/p/ps6mnfqyrfo7es3.html?vid=q0181hpdvo5
-        rurl = match1(content, r'<link.*?rel\s*=\s*"canonical".*?href\s*="(.+?)".*?>') #https://v.qq.com/x/cover/9hpjiv5fhiyn86u/t0522x58xma.html
+        # vid = parse_qs(urlparse(url).query).get('vid') #for links specified vid  like http://v.qq.com/cover/p/ps6mnfqyrfo7es3.html?vid=q0181hpdvo5
+        rurl = match1(content, r'<link.*?rel\s*=\s*"canonical".*?href\s*="(.+?)".*?>')  # https://v.qq.com/x/cover/9hpjiv5fhiyn86u/t0522x58xma.html
         vid = ""
         if rurl:
             vid = rurl.split('/')[-1].split('.')[0]
             # https://v.qq.com/x/page/d0552xbadkl.html https://y.qq.com/n/yqq/mv/v/g00268vlkzy.html
             if vid == "undefined" or vid == "index":
                 vid = ""
-        vid = vid if vid else url.split('/')[-1].split('.')[0] #https://v.qq.com/x/cover/ps6mnfqyrfo7es3/q0181hpdvo5.html?
-        vid = vid if vid else match1(content, r'vid"*\s*:\s*"\s*([^"]+)"') #general fallback
+        vid = vid if vid else url.split('/')[-1].split('.')[0]  # https://v.qq.com/x/cover/ps6mnfqyrfo7es3/q0181hpdvo5.html?
+        vid = vid if vid else match1(content, r'vid"*\s*:\s*"\s*([^"]+)"')  # general fallback
         if not vid:
             vid = match1(content, r'id"*\s*:\s*"(.+?)"')
-        title = match1(content,r'<a.*?id\s*=\s*"%s".*?title\s*=\s*"(.+?)".*?>'%vid)
+        title = match1(content, r'<a.*?id\s*=\s*"%s".*?title\s*=\s*"(.+?)".*?>' % vid)
         title = match1(content, r'title">([^"]+)</p>') if not title else title
         title = match1(content, r'"title":"([^"]+)"') if not title else title
-        title = vid if not title else title #general fallback
-
+        title = vid if not title else title  # general fallback
 
     qq_download_by_vid(vid, title, output_dir, merge, info_only)
+
 
 site_info = "QQ.com"
 download = qq_download

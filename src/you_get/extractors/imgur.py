@@ -2,7 +2,7 @@
 
 from ..common import *
 from ..extractor import VideoExtractor
-from .universal import *
+
 
 class Imgur(VideoExtractor):
     name = "Imgur"
@@ -68,6 +68,7 @@ class Imgur(VideoExtractor):
             i = kwargs['stream_id']
             if 'size' not in self.streams[i]:
                 self.streams[i]['size'] = urls_size(self.streams[i]['src'])
+
 
 site = Imgur()
 download = site.download_by_url

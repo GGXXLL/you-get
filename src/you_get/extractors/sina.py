@@ -2,14 +2,15 @@
 
 __all__ = ['sina_download', 'sina_download_by_vid', 'sina_download_by_vkey']
 
-from ..common import *
-from ..util.log import *
-
+import urllib.parse
 from hashlib import md5
 from random import randint
 from time import time
+
 from xml.dom.minidom import parseString
-import urllib.parse
+
+from ..common import *
+
 
 def api_req(vid):
     rand = "0.{0}{1}".format(randint(10000, 10000000), randint(10000, 10000000))
@@ -18,6 +19,7 @@ def api_req(vid):
     url = 'http://ask.ivideo.sina.com.cn/v_play.php?vid={0}&ran={1}&p=i&k={2}'.format(vid, rand, k)
     xml = get_content(url, headers=fake_headers)
     return xml
+
 
 def video_info(xml):
     video = parseString(xml).getElementsByTagName('video')[0]
@@ -38,6 +40,7 @@ def video_info(xml):
 
     return urls, vname, size
 
+
 def sina_download_by_vid(vid, title=None, output_dir='.', merge=True, info_only=False):
     """Downloads a Sina video by its unique vid.
     http://video.sina.com.cn/
@@ -49,7 +52,8 @@ def sina_download_by_vid(vid, title=None, output_dir='.', merge=True, info_only=
     title = name
     print_info(site_info, title, 'flv', size)
     if not info_only:
-        download_urls(urls, title, 'flv', size, output_dir = output_dir, merge = merge)
+        download_urls(urls, title, 'flv', size, output_dir=output_dir, merge=merge)
+
 
 def sina_download_by_vkey(vkey, title=None, output_dir='.', merge=True, info_only=False):
     """Downloads a Sina video by its unique vkey.
@@ -61,7 +65,8 @@ def sina_download_by_vkey(vkey, title=None, output_dir='.', merge=True, info_onl
 
     print_info(site_info, title, 'flv', size)
     if not info_only:
-        download_urls([url], title, 'flv', size, output_dir = output_dir, merge = merge)
+        download_urls([url], title, 'flv', size, output_dir=output_dir, merge=merge)
+
 
 def sina_zxt(url, output_dir='.', merge=True, info_only=False, **kwargs):
     ep = 'http://s.video.sina.com.cn/video/play?video_id='
@@ -70,10 +75,10 @@ def sina_zxt(url, output_dir='.', merge=True, info_only=False, **kwargs):
         log.wtf('No video specified with fragment')
     meta = json.loads(get_content(ep + frag))
     if meta['code'] != 1:
-# Yes they use 1 for success.
+        # Yes they use 1 for success.
         log.wtf(meta['message'])
     title = meta['data']['title']
-    videos = sorted(meta['data']['videos'], key = lambda i: int(i['size']))
+    videos = sorted(meta['data']['videos'], key=lambda i: int(i['size']))
 
     if len(videos) == 0:
         log.wtf('No video file returned by API server')
@@ -90,6 +95,7 @@ def sina_zxt(url, output_dir='.', merge=True, info_only=False, **kwargs):
     if not info_only:
         download_urls(urls, title, container, size, output_dir=output_dir, merge=merge, **kwargs)
     return
+
 
 def sina_download(url, output_dir='.', merge=True, info_only=False, **kwargs):
     """Downloads Sina videos by URL.
@@ -109,7 +115,7 @@ def sina_download(url, output_dir='.', merge=True, info_only=False, **kwargs):
     if vid is None:
         vid = match1(video_page, r'vid:"?(\d+)"?')
     if vid:
-        #title = match1(video_page, r'title\s*:\s*\'([^\']+)\'')
+        # title = match1(video_page, r'title\s*:\s*\'([^\']+)\'')
         sina_download_by_vid(vid, output_dir=output_dir, merge=merge, info_only=info_only)
     else:
         vkey = match1(video_page, r'vkey\s*:\s*"([^"]+)"')
@@ -119,6 +125,7 @@ def sina_download(url, output_dir='.', merge=True, info_only=False, **kwargs):
             return
         title = match1(video_page, r'title\s*:\s*"([^"]+)"')
         sina_download_by_vkey(vkey, title=title, output_dir=output_dir, merge=merge, info_only=info_only)
+
 
 site_info = "Sina.com"
 download = sina_download

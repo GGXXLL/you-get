@@ -2,9 +2,9 @@
 
 __all__ = ['flickr_download_main']
 
-from ..common import *
-
 import json
+
+from ..common import *
 
 pattern_url_photoset = r'https?://www\.flickr\.com/photos/.+/(?:(?:sets)|(?:albums))?/([^/]+)'
 pattern_url_photostream = r'https?://www\.flickr\.com/photos/([^/]+)(?:/|(?:/page))?$'
@@ -24,7 +24,7 @@ tmpl_api_call = (
     'https://api.flickr.com/services/rest?'
     '&format=json&nojsoncallback=1'
     # UNCOMMENT FOR TESTING
-    #'&per_page=5'
+    # '&per_page=5'
     '&per_page=500'
     # this parameter CANNOT take control of 'flickr.galleries.getPhotos'
     # though the doc said it should.
@@ -55,19 +55,25 @@ tmpl_api_call_photo_info = (
 # looks that flickr won't return urls for all sizes
 # we required in 'extras field without a acceptable header
 dummy_header = {
-    'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:53.0) Gecko/20100101 Firefox/53.0'
+    'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:53.0) Gecko/20100101 Firefox/53.0'
 }
+
+
 def get_content_headered(url):
     return get_content(url, dummy_header)
+
 
 def get_photoset_id(url, page):
     return match1(url, pattern_url_photoset)
 
+
 def get_photo_id(url, page):
     return match1(url, pattern_url_single_photo)
 
+
 def get_gallery_id(url, page):
     return match1(url, pattern_url_gallery)
+
 
 def get_api_key(page):
     match = match1(page, pattern_inline_api_key)
@@ -80,8 +86,10 @@ def get_api_key(page):
         return match1(get_html('https://flickr.com'), pattern_inline_api_key)
     return match
 
+
 def get_NSID(url, page):
     return match1(page, pattern_inline_NSID)
+
 
 # [
 # (
@@ -138,9 +146,10 @@ url_patterns = [
     )
 ]
 
-def flickr_download_main(url, output_dir = '.', merge = False, info_only = False, **kwargs):
+
+def flickr_download_main(url, output_dir='.', merge=False, info_only=False, **kwargs):
     urls = None
-    size = 'o' # works for collections only
+    size = 'o'  # works for collections only
     title = None
     if 'stream_id' in kwargs:
         size = kwargs['stream_id']
@@ -158,12 +167,14 @@ def flickr_download_main(url, output_dir = '.', merge = False, info_only = False
             download_urls([url], title + suffix, ext, False, output_dir, None, False, False)
             index = index + 1
 
+
 def fetch_photo_url_list(url, size):
     for pattern in url_patterns:
         # FIXME: fix multiple matching since the match group is dropped
         if match1(url, pattern[0]):
             return fetch_photo_url_list_impl(url, size, *pattern[1:])
     raise NotImplementedError('Flickr extractor is not supported for %s.' % url)
+
 
 def fetch_photo_url_list_impl(url, size, method, id_field, id_parse_func, collection_name):
     page = get_html(url)
@@ -187,9 +198,11 @@ def fetch_photo_url_list_impl(url, size, method, id_field, id_parse_func, collec
             break
     return urls, match1(page, pattern_inline_title)
 
+
 # image size suffixes used in inline json 'key' field
 # listed in descending order
 size_suffixes = ['o', 'k', 'h', 'l', 'c', 'z', 'm', 'n', 's', 't', 'q', 'sq']
+
 
 def get_orig_video_source(api_key, pid, secret):
     parsed = json.loads(get_content_headered(tmpl_api_call_video_info % (api_key, pid, secret)))
@@ -197,6 +210,7 @@ def get_orig_video_source(api_key, pid, secret):
         if stream['type'] == 'orig':
             return stream['_content'].replace('\\', '')
     return None
+
 
 def get_url_of_largest(info, api_key, size):
     if info['media'] == 'photo':
@@ -210,6 +224,7 @@ def get_url_of_largest(info, api_key, size):
     else:
         return get_orig_video_source(api_key, info['id'], info['secret'])
 
+
 def get_single_photo_url(url):
     page = get_html(url)
     pid = get_photo_id(url, page)
@@ -219,9 +234,10 @@ def get_single_photo_url(url):
         reply = get_content(tmpl_api_call_photo_info % (api_key, get_photo_id(url, page)))
         secret = json.loads(reply)['photo']['secret']
         return get_orig_video_source(api_key, pid, secret), title
-    #last match always has the best resolution
+    # last match always has the best resolution
     match = match1(page, pattern_inline_img_url)
     return 'https:' + match.replace('\\', ''), title
+
 
 site_info = "Flickr.com"
 download = flickr_download_main

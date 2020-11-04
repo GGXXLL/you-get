@@ -2,10 +2,10 @@
 
 __all__ = ['sndcd_download']
 
-from ..common import *
-import re
 import json
-import urllib.error
+import re
+
+from ..common import *
 
 
 def get_sndcd_apikey():
@@ -28,7 +28,7 @@ def get_resource_info(resource_url, client_id):
 
     ids = [i['id'] for i in info if i.get('comment_count') is None]
     ids = list(map(str, ids))
-    ids_split = ['%2C'.join(ids[i:i+10]) for i in range(0, len(ids), 10)]
+    ids_split = ['%2C'.join(ids[i:i + 10]) for i in range(0, len(ids), 10)]
     api_url = 'https://api-v2.soundcloud.com/tracks?ids={ids}&client_id={client_id}&%5Bobject%20Object%5D=&app_version=1584348206&app_locale=en'
 
     res = []

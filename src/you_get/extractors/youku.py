@@ -1,18 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import json
+import time
+import urllib.parse
+import urllib.request
+
 from ..common import *
 from ..extractor import VideoExtractor
 
-import time
-import traceback
-import json
-import urllib.request
-import urllib.parse
-
 
 def fetch_cna():
-
     def quote_cna(val):
         if '%' in val:
             return val
@@ -43,25 +41,25 @@ class Youku(VideoExtractor):
 
     # Last updated: 2017-10-13
     stream_types = [
-        {'id': 'hd3',      'container': 'flv', 'video_profile': '1080P'},
-        {'id': 'hd3v2',    'container': 'flv', 'video_profile': '1080P'},
-        {'id': 'mp4hd3',   'container': 'mp4', 'video_profile': '1080P'},
+        {'id': 'hd3', 'container': 'flv', 'video_profile': '1080P'},
+        {'id': 'hd3v2', 'container': 'flv', 'video_profile': '1080P'},
+        {'id': 'mp4hd3', 'container': 'mp4', 'video_profile': '1080P'},
         {'id': 'mp4hd3v2', 'container': 'mp4', 'video_profile': '1080P'},
 
-        {'id': 'hd2',      'container': 'flv', 'video_profile': '超清'},
-        {'id': 'hd2v2',    'container': 'flv', 'video_profile': '超清'},
-        {'id': 'mp4hd2',   'container': 'mp4', 'video_profile': '超清'},
+        {'id': 'hd2', 'container': 'flv', 'video_profile': '超清'},
+        {'id': 'hd2v2', 'container': 'flv', 'video_profile': '超清'},
+        {'id': 'mp4hd2', 'container': 'mp4', 'video_profile': '超清'},
         {'id': 'mp4hd2v2', 'container': 'mp4', 'video_profile': '超清'},
 
-        {'id': 'mp4hd',    'container': 'mp4', 'video_profile': '高清'},
+        {'id': 'mp4hd', 'container': 'mp4', 'video_profile': '高清'},
         # not really equivalent to mp4hd
-        {'id': 'flvhd',    'container': 'flv', 'video_profile': '渣清'},
-        {'id': '3gphd',    'container': 'mp4', 'video_profile': '渣清'},
+        {'id': 'flvhd', 'container': 'flv', 'video_profile': '渣清'},
+        {'id': '3gphd', 'container': 'mp4', 'video_profile': '渣清'},
 
-        {'id': 'mp4sd',    'container': 'mp4', 'video_profile': '标清'},
+        {'id': 'mp4sd', 'container': 'mp4', 'video_profile': '标清'},
         # obsolete?
-        {'id': 'flv',      'container': 'flv', 'video_profile': '标清'},
-        {'id': 'mp4',      'container': 'mp4', 'video_profile': '标清'},
+        {'id': 'flv', 'container': 'flv', 'video_profile': '标清'},
+        {'id': 'mp4', 'container': 'mp4', 'video_profile': '标清'},
     ]
 
     def __init__(self):
@@ -125,10 +123,10 @@ class Youku(VideoExtractor):
     def get_vid_from_url(self):
         # It's unreliable. check #1633
         b64p = r'([a-zA-Z0-9=]+)'
-        p_list = [r'youku\.com/v_show/id_'+b64p,
-                  r'player\.youku\.com/player\.php/sid/'+b64p+r'/v\.swf',
-                  r'loader\.swf\?VideoIDS='+b64p,
-                  r'player\.youku\.com/embed/'+b64p]
+        p_list = [r'youku\.com/v_show/id_' + b64p,
+                  r'player\.youku\.com/player\.php/sid/' + b64p + r'/v\.swf',
+                  r'loader\.swf\?VideoIDS=' + b64p,
+                  r'player\.youku\.com/embed/' + b64p]
         if not self.url:
             raise Exception('No url')
         for p in p_list:
@@ -275,7 +273,7 @@ def youku_download_playlist_by_url(url, **kwargs):
         ep = 'http://list.youku.com/show/module?id={}&tab=showInfo&callback=jQuery'.format(show_id)
         xhr_page = get_content(ep).replace('\/', '/').replace('\"', '"')
         video_url = re.search(r'(v.youku.com/v_show/id_(?:[A-Za-z0-9=]+)\.html)', xhr_page).group(1)
-        youku_download_playlist_by_url('http://'+video_url, **kwargs)
+        youku_download_playlist_by_url('http://' + video_url, **kwargs)
         return
     elif re.match('https?://list.youku.com/albumlist/show/id_(\d+)\.html', url):
         # http://list.youku.com/albumlist/show/id_2336634.html
@@ -292,7 +290,7 @@ def youku_download_playlist_by_url(url, **kwargs):
 
         if video_cnt > 20:
             req_cnt = video_cnt // 20
-            for i in range(2, req_cnt+2):
+            for i in range(2, req_cnt + 2):
                 req_u = ep.format(list_id, i)
                 xhr_page = get_content(req_u)
                 json_data = json.loads(re.search(js_cb_pt, xhr_page).group(1).replace('\/', '/'))
@@ -311,6 +309,7 @@ def youku_download_by_url(url, **kwargs):
 
 def youku_download_by_vid(vid, **kwargs):
     Youku().download_by_vid(vid, **kwargs)
+
 
 download = youku_download_by_url
 download_playlist = youku_download_playlist_by_url

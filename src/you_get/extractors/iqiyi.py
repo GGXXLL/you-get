@@ -1,18 +1,14 @@
 #!/usr/bin/env python
 
+import hashlib
+import json
+import time
+
+from .. import json_output
 from ..common import *
 from ..common import print_more_compatible as print
 from ..extractor import VideoExtractor
 from ..util import log
-from .. import json_output
-
-from uuid import uuid4
-from random import random,randint
-import json
-from math import floor
-from zlib import decompress
-import hashlib
-import time
 
 '''
 Changelog:
@@ -82,13 +78,16 @@ def getDispathKey(rid):
     t=str(int(floor(int(time)/(10*60.0))))
     return hashlib.new("md5",bytes(t+tp+rid,"utf-8")).hexdigest()
 '''
+
+
 def getVMS(tvid, vid):
     t = int(time.time() * 1000)
     src = '76f90cbd92f94a2e925d83e8ccd22cb7'
     key = 'd5fb4bd9d50c4be6948c97edd7254b0e'
-    sc = hashlib.new('md5', bytes(str(t) + key  + vid, 'utf-8')).hexdigest()
-    vmsreq= url = 'http://cache.m.iqiyi.com/tmts/{0}/{1}/?t={2}&sc={3}&src={4}'.format(tvid,vid,t,sc,src)
+    sc = hashlib.new('md5', bytes(str(t) + key + vid, 'utf-8')).hexdigest()
+    vmsreq = url = 'http://cache.m.iqiyi.com/tmts/{0}/{1}/?t={2}&sc={3}&src={4}'.format(tvid, vid, t, sc, src)
     return json.loads(get_content(vmsreq))
+
 
 class Iqiyi(VideoExtractor):
     name = "爱奇艺 (Iqiyi)"
@@ -109,11 +108,9 @@ class Iqiyi(VideoExtractor):
 
     stream_to_bid = {  '4k': 10, 'fullhd' : 5, 'suprt-high' : 4, 'super' : 3, 'high' : 2, 'standard' :1, 'topspeed' :96}
     '''
-    ids = ['4k','BD', 'TD', 'HD', 'SD', 'LD']
-    vd_2_id = {10: '4k', 19: '4k', 5:'BD', 18: 'BD', 21: 'HD_H265', 2: 'HD', 4: 'TD', 17: 'TD_H265', 96: 'LD', 1: 'SD', 14: 'TD'}
-    id_2_profile = {'4k':'4k', 'BD': '1080p','TD': '720p', 'HD': '540p', 'SD': '360p', 'LD': '210p', 'HD_H265': '540p H265', 'TD_H265': '720p H265'}
-
-
+    ids = ['4k', 'BD', 'TD', 'HD', 'SD', 'LD']
+    vd_2_id = {10: '4k', 19: '4k', 5: 'BD', 18: 'BD', 21: 'HD_H265', 2: 'HD', 4: 'TD', 17: 'TD_H265', 96: 'LD', 1: 'SD', 14: 'TD'}
+    id_2_profile = {'4k': '4k', 'BD': '1080p', 'TD': '720p', 'HD': '540p', 'SD': '360p', 'LD': '210p', 'HD_H265': '540p H265', 'TD_H265': '720p H265'}
 
     def download_playlist_by_url(self, url, **kwargs):
         self.url = url
@@ -149,11 +146,10 @@ class Iqiyi(VideoExtractor):
                 if stream_id in self.stream_types:
                     continue
                 stream_profile = self.id_2_profile[stream_id]
-                self.streams[stream_id] = {'video_profile': stream_profile, 'container': 'm3u8', 'src': [stream['m3u']], 'size' : 0, 'm3u8_url': stream['m3u']}
+                self.streams[stream_id] = {'video_profile': stream_profile, 'container': 'm3u8', 'src': [stream['m3u']], 'size': 0, 'm3u8_url': stream['m3u']}
             except Exception as e:
                 log.i("vd: {} is not handled".format(stream['vd']))
                 log.i("info is {}".format(stream))
-
 
     def download(self, **kwargs):
         """Override the original one
@@ -202,7 +198,7 @@ class Iqiyi(VideoExtractor):
                 log.wtf('[Failed] Cannot extract video source.')
             # For legacy main()
 
-            #Here's the change!!
+            # Here's the change!!
             download_url_ffmpeg(urls[0], self.title, 'mp4', output_dir=kwargs['output_dir'], merge=kwargs['merge'], stream=False)
 
             if not kwargs['caption']:
@@ -216,6 +212,7 @@ class Iqiyi(VideoExtractor):
                           'w', encoding='utf-8') as x:
                     x.write(srt)
                 print('Done.')
+
 
 '''
         if info["code"] != "A000000":

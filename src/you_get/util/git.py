@@ -2,7 +2,9 @@
 
 import os
 import subprocess
+
 from ..version import __version__
+
 
 def get_head(repo_path):
     """Get (branch, commit) from HEAD of a git repo."""
@@ -13,6 +15,7 @@ def get_head(repo_path):
         return branch, commit
     except:
         return None
+
 
 def get_version(repo_path):
     try:

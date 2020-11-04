@@ -3,16 +3,16 @@
 __all__ = ['facebook_download']
 
 from ..common import *
-import json
+
 
 def facebook_download(url, output_dir='.', merge=True, info_only=False, **kwargs):
-    url = re.sub(r'//.*?facebook.com','//facebook.com',url)
+    url = re.sub(r'//.*?facebook.com', '//facebook.com', url)
     html = get_html(url)
 
     title = r1(r'<title id="pageTitle">(.+)</title>', html)
 
     if title is None:
-      title = url
+        title = url
 
     sd_urls = list(set([
         unicodize(str.replace(i, '\\/', '/'))
@@ -30,6 +30,7 @@ def facebook_download(url, output_dir='.', merge=True, info_only=False, **kwargs
     print_info(site_info, title, type, size)
     if not info_only:
         download_urls(urls, title, ext, size, output_dir, merge=False)
+
 
 site_info = "Facebook.com"
 download = facebook_download

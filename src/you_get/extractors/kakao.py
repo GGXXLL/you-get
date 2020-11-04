@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
-from ..common import *
 from .universal import *
+from ..common import *
 
 __all__ = ['kakao_download']
 
 
-def kakao_download(url, output_dir='.', info_only=False,  **kwargs):
+def kakao_download(url, output_dir='.', info_only=False, **kwargs):
     json_request_url = 'https://videofarm.daum.net/controller/api/closed/v1_2/IntegratedMovieData.json?vid={}'
 
     # in this implementation playlist not supported so use url_without_playlist

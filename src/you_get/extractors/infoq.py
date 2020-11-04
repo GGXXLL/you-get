@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
+import ssl
+
 from ..common import *
 from ..extractor import VideoExtractor
 
-import ssl
 
 class Infoq(VideoExtractor):
     name = "InfoQ"
@@ -40,15 +41,16 @@ class Infoq(VideoExtractor):
         ]
         request.install_opener(opener)
 
-        if s: self.streams['video'] = {'url': s }
-        if mp3: self.streams['audio'] = { 'url': mp3 }
-        if pdf: self.streams['slides'] = { 'url': pdf }
+        if s: self.streams['video'] = {'url': s}
+        if mp3: self.streams['audio'] = {'url': mp3}
+        if pdf: self.streams['slides'] = {'url': pdf}
 
     def extract(self, **kwargs):
         for i in self.streams:
             s = self.streams[i]
             _, s['container'], s['size'] = url_info(s['url'])
             s['src'] = [s['url']]
+
 
 site = Infoq()
 download = site.download_by_url

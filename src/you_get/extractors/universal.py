@@ -2,8 +2,9 @@
 
 __all__ = ['universal_download']
 
-from ..common import *
 from .embed import *
+from ..common import *
+
 
 def universal_download(url, output_dir='.', merge=True, info_only=False, **kwargs):
     try:
@@ -65,13 +66,13 @@ def universal_download(url, output_dir='.', merge=True, info_only=False, **kwarg
 
         # most common media file extensions on the Internet
         media_exts = ['\.flv', '\.mp3', '\.mp4', '\.webm',
-                      '[-_]1\d\d\d\.jpe?g', '[-_][6-9]\d\d\.jpe?g', # tumblr
+                      '[-_]1\d\d\d\.jpe?g', '[-_][6-9]\d\d\.jpe?g',  # tumblr
                       '[-_]1\d\d\dx[6-9]\d\d\.jpe?g',
                       '[-_][6-9]\d\dx1\d\d\d\.jpe?g',
                       '[-_][6-9]\d\dx[6-9]\d\d\.jpe?g',
-                      's1600/[\w%]+\.jpe?g', # blogger
-                      'img[6-9]\d\d/[\w%]+\.jpe?g' # oricon?
-        ]
+                      's1600/[\w%]+\.jpe?g',  # blogger
+                      'img[6-9]\d\d/[\w%]+\.jpe?g'  # oricon?
+                      ]
 
         urls = []
         for i in media_exts:
@@ -97,7 +98,7 @@ def universal_download(url, output_dir='.', merge=True, info_only=False, **kwarg
         rel_urls += re.findall(r'href="(\.[^"]+\.png)"', page, re.I)
         rel_urls += re.findall(r'href="(\.[^"]+\.gif)"', page, re.I)
         for rel_url in rel_urls:
-            urls += [ r1(r'(.*/)', url) + rel_url ]
+            urls += [r1(r'(.*/)', url) + rel_url]
 
         # site-relative path
         rel_urls = []
@@ -105,7 +106,7 @@ def universal_download(url, output_dir='.', merge=True, info_only=False, **kwarg
         rel_urls += re.findall(r'href="(/[^"]+\.png)"', page, re.I)
         rel_urls += re.findall(r'href="(/[^"]+\.gif)"', page, re.I)
         for rel_url in rel_urls:
-            urls += [ r1(r'(https?://[^/]+)', url) + rel_url ]
+            urls += [r1(r'(https?://[^/]+)', url) + rel_url]
 
         # sometimes naive
         urls += re.findall(r'data-original="(https?://[^"]+\.jpe?g)"', page, re.I)
@@ -117,7 +118,7 @@ def universal_download(url, output_dir='.', merge=True, info_only=False, **kwarg
         for mpd_url in mpd_urls:
             cont = get_content(mpd_url)
             base_url = r1(r'<BaseURL>(.*)</BaseURL>', cont)
-            urls += [ r1(r'(.*/)[^/]*', mpd_url) + base_url ]
+            urls += [r1(r'(.*/)[^/]*', mpd_url) + base_url]
 
         # have some candy!
         candies = []
@@ -171,6 +172,7 @@ def universal_download(url, output_dir='.', merge=True, info_only=False, **kwarg
                           output_dir=output_dir, merge=merge,
                           faker=True)
         return
+
 
 site_info = None
 download = universal_download

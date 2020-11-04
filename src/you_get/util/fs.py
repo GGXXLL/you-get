@@ -2,6 +2,7 @@
 
 from .os import detect_os
 
+
 def legitimize(text, os=detect_os()):
     """Converts a string to a valid filename.
     """
@@ -43,5 +44,5 @@ def legitimize(text, os=detect_os()):
         if text.startswith("."):
             text = text[1:]
 
-    text = text[:80] # Trim to 82 Unicode characters long
+    text = text[:80]  # Trim to 82 Unicode characters long
     return text

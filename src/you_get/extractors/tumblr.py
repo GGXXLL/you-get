@@ -2,11 +2,12 @@
 
 __all__ = ['tumblr_download']
 
-from ..common import *
-from .universal import *
 from .dailymotion import dailymotion_download
+from .universal import *
 from .vimeo import vimeo_download
 from .vine import vine_download
+from ..common import *
+
 
 def tumblr_download(url, output_dir='.', merge=True, info_only=False, **kwargs):
     if re.match(r'https?://\d+\.media\.tumblr\.com/', url):
@@ -43,8 +44,8 @@ def tumblr_download(url, output_dir='.', merge=True, info_only=False, **kwargs):
         page_title = r1(r'<meta name="description" content="([^"\n]+)', html) or \
                      r1(r'<meta property="og:description" content="([^"\n]+)', html) or \
                      r1(r'<title>([^<\n]*)', html)
-        urls = re.findall(r'(https?://[^;"&]+/tumblr_[^;"&]+_\d+\.jpg)', html) +\
-               re.findall(r'(https?://[^;"&]+/tumblr_[^;"&]+_\d+\.png)', html) +\
+        urls = re.findall(r'(https?://[^;"&]+/tumblr_[^;"&]+_\d+\.jpg)', html) + \
+               re.findall(r'(https?://[^;"&]+/tumblr_[^;"&]+_\d+\.png)', html) + \
                re.findall(r'(https?://[^;"&]+/tumblr_[^";&]+_\d+\.gif)', html)
 
         tuggles = {}
@@ -52,9 +53,9 @@ def tumblr_download(url, output_dir='.', merge=True, info_only=False, **kwargs):
             if url.endswith('.gif'):
                 hd_url = url
             elif url.endswith('.jpg'):
-                hd_url = r1(r'(.+)_\d+\.jpg$', url) + '_1280.jpg' # FIXME: decide actual quality
+                hd_url = r1(r'(.+)_\d+\.jpg$', url) + '_1280.jpg'  # FIXME: decide actual quality
             elif url.endswith('.png'):
-                hd_url = r1(r'(.+)_\d+\.png$', url) + '_1280.png' # FIXME: decide actual quality
+                hd_url = r1(r'(.+)_\d+\.png$', url) + '_1280.png'  # FIXME: decide actual quality
             else:
                 continue
             filename = parse.unquote(hd_url.split('/')[-1])
@@ -72,7 +73,8 @@ def tumblr_download(url, output_dir='.', merge=True, info_only=False, **kwargs):
                         'ext': ext,
                         'size': size,
                     }
-            except: pass
+            except:
+                pass
 
         if tuggles:
             size = sum([tuggles[t]['size'] for t in tuggles])
@@ -126,8 +128,8 @@ def tumblr_download(url, output_dir='.', merge=True, info_only=False, **kwargs):
                 real_url = r1(r'<source src="([^"]*)"', iframe_html)
 
     title = unescape_html(r1(r'<meta property="og:title" content="([^"]*)" />', html) or
-        r1(r'<meta property="og:description" content="([^"]*)" />', html) or
-        r1(r'<title>([^<\n]*)', html) or url.split("/")[4]).replace('\n', '')
+                          r1(r'<meta property="og:description" content="([^"]*)" />', html) or
+                          r1(r'<title>([^<\n]*)', html) or url.split("/")[4]).replace('\n', '')
 
     # this is better
     vcode = r1(r'tumblr_(\w+)', real_url)
@@ -138,6 +140,7 @@ def tumblr_download(url, output_dir='.', merge=True, info_only=False, **kwargs):
     print_info(site_info, title, type, size)
     if not info_only:
         download_urls([real_url], title, ext, size, output_dir, merge=merge)
+
 
 site_info = "Tumblr.com"
 download = tumblr_download

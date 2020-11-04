@@ -2,21 +2,23 @@
 
 __all__ = ['iqilu_download']
 
-from ..common import *
 import json
 
-def iqilu_download(url, output_dir = '.', merge = False, info_only = False, **kwargs):
+from ..common import *
+
+
+def iqilu_download(url, output_dir='.', merge=False, info_only=False, **kwargs):
     ''''''
     if re.match(r'http://v.iqilu.com/\w+', url):
         patt = r'url\s*:\s*\[([^\]]+)\]'
-        
-        #URL in webpage
+
+        # URL in webpage
         html = get_content(url)
         player_data = '[' + match1(html, patt) + ']'
         urls = json.loads(player_data)
         url = urls[0]['stream_url']
-        
-        #grab title
+
+        # grab title
         title = match1(html, r'<meta name="description" content="(.*?)\"\W')
 
         type_, ext, size = url_info(url)

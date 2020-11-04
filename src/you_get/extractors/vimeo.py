@@ -2,30 +2,33 @@
 
 __all__ = ['vimeo_download', 'vimeo_download_by_id', 'vimeo_download_by_channel', 'vimeo_download_by_channel_id']
 
-from ..common import *
-from ..util.log import *
-from ..extractor import VideoExtractor
-from json import loads
 import urllib.error
 import urllib.parse
+from json import loads
 
-access_token = 'f6785418277b72c7c87d3132c79eec24'  #By Beining
+from ..common import *
+from ..extractor import VideoExtractor
 
-#----------------------------------------------------------------------
+access_token = 'f6785418277b72c7c87d3132c79eec24'  # By Beining
+
+
+# ----------------------------------------------------------------------
 def vimeo_download_by_channel(url, output_dir='.', merge=False, info_only=False, **kwargs):
     """str->None"""
     # https://vimeo.com/channels/464686
     channel_id = match1(url, r'http://vimeo.com/channels/(\w+)')
     vimeo_download_by_channel_id(channel_id, output_dir, merge, info_only, **kwargs)
 
-#----------------------------------------------------------------------
+
+# ----------------------------------------------------------------------
 def vimeo_download_by_channel_id(channel_id, output_dir='.', merge=False, info_only=False, **kwargs):
     """str/int->None"""
-    html = get_content('https://api.vimeo.com/channels/{channel_id}/videos?access_token={access_token}'.format(channel_id=channel_id, access_token=access_token))
+    html = get_content(
+        'https://api.vimeo.com/channels/{channel_id}/videos?access_token={access_token}'.format(channel_id=channel_id, access_token=access_token))
     data = loads(html)
     id_list = []
 
-    #print(data)
+    # print(data)
     for i in data['data']:
         id_list.append(match1(i['uri'], r'/videos/(\w+)'))
 
@@ -34,6 +37,7 @@ def vimeo_download_by_channel_id(channel_id, output_dir='.', merge=False, info_o
             vimeo_download_by_id(id, None, output_dir, merge, info_only, **kwargs)
         except urllib.error.URLError as e:
             log.w('{} failed with {}'.format(id, e))
+
 
 class VimeoExtractor(VideoExtractor):
     stream_types = [
@@ -110,7 +114,7 @@ class VimeoExtractor(VideoExtractor):
                 height = hit.group(2)
 
                 if height in ('2160', '1440'):
-                    m3u8_url = urllib.parse.urljoin(master_url, lines[pos+1])
+                    m3u8_url = urllib.parse.urljoin(master_url, lines[pos + 1])
                     meta = dict(m3u8_url=m3u8_url, container='m3u8')
                     if height == '1440':
                         meta['video_profile'] = '2560x1440'
@@ -118,7 +122,7 @@ class VimeoExtractor(VideoExtractor):
                         meta['video_profile'] = '3840x2160'
                     meta['size'] = 0
                     meta['src'] = general_m3u8_extractor(m3u8_url)
-                    self.streams[height+'p'] = meta
+                    self.streams[height + 'p'] = meta
 
                 pos += 2
             else:
@@ -128,7 +132,6 @@ class VimeoExtractor(VideoExtractor):
             if stream_type['id'] in self.streams:
                 item = [('id', stream_type['id'])] + list(self.streams[stream_type['id']].items())
                 self.streams_sorted.append(dict(item))
-
 
 
 def vimeo_download_by_id(id, title=None, output_dir='.', merge=True, info_only=False, **kwargs):
@@ -163,6 +166,7 @@ def vimeo_download_by_id(id, title=None, output_dir='.', merge=True, info_only=F
     site = VimeoExtractor()
     site.download_by_vid(id, info_only=info_only, output_dir=output_dir, merge=merge, **kwargs)
 
+
 def vimeo_download(url, output_dir='.', merge=True, info_only=False, **kwargs):
     if re.match(r'https?://vimeo.com/channels/\w+', url):
         vimeo_download_by_channel(url, output_dir, merge, info_only)
@@ -174,6 +178,7 @@ def vimeo_download(url, output_dir='.', merge=True, info_only=False, **kwargs):
         assert id
 
         vimeo_download_by_id(id, None, output_dir=output_dir, merge=merge, info_only=info_only, **kwargs)
+
 
 site_info = "Vimeo.com"
 download = vimeo_download

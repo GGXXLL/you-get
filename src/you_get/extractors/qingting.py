@@ -45,6 +45,7 @@ class Qingting(VideoExtractor):
 def qingting_download_by_url(url, **kwargs):
     Qingting().download_by_url(url, **kwargs)
 
+
 site_info = 'Qingting'
 download = qingting_download_by_url
 download_playlist = playlist_not_supported('Qingting')

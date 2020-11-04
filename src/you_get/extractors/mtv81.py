@@ -2,11 +2,11 @@
 
 __all__ = ['mtv81_download']
 
-from ..common import *
+from html.parser import HTMLParser
 
 from xml.dom.minidom import parseString
 
-from html.parser import HTMLParser
+from ..common import *
 
 
 def mtv81_download(url, output_dir='.', merge=True, info_only=False, **kwargs):
@@ -34,7 +34,7 @@ def mtv81_download(url, output_dir='.', merge=True, info_only=False, **kwargs):
         # import pdb
         # pdb.set_trace()
         download_rtmp_url(url=url, title=title, ext=ext, params={
-                          "--swfVfy": "http://media.mtvnservices.com/player/prime/mediaplayerprime.1.10.8.swf"}, output_dir=output_dir)
+            "--swfVfy": "http://media.mtvnservices.com/player/prime/mediaplayerprime.1.10.8.swf"}, output_dir=output_dir)
 
 
 site_info = "mtv81.com"

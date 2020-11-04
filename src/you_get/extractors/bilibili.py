@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
+import hashlib
+
 from ..common import *
 from ..extractor import VideoExtractor
 
-import hashlib
 
 class Bilibili(VideoExtractor):
     name = "Bilibili"
@@ -125,9 +126,9 @@ class Bilibili(VideoExtractor):
         return 'https://api.vc.bilibili.com/link_draw/v1/doc/detail?doc_id=%s' % doc_id
 
     @staticmethod
-    def url_size(url, faker=False, headers={},err_value=0):
+    def url_size(url, faker=False, headers={}, err_value=0):
         try:
-            return url_size(url,faker,headers)
+            return url_size(url, faker, headers)
         except:
             return err_value
 
@@ -138,7 +139,7 @@ class Bilibili(VideoExtractor):
             html_content = get_content(self.url, headers=self.bilibili_headers(referer=self.url))
         except:
             html_content = ''  # live always returns 400 (why?)
-        #self.title = match1(html_content,
+        # self.title = match1(html_content,
         #                    r'<h1 title="([^"]+)"')
 
         # redirect: watchlater
@@ -151,7 +152,7 @@ class Bilibili(VideoExtractor):
         # redirect: bangumi/play/ss -> bangumi/play/ep
         # redirect: bangumi.bilibili.com/anime -> bangumi/play/ep
         elif re.match(r'https?://(www\.)?bilibili\.com/bangumi/play/ss(\d+)', self.url) or \
-             re.match(r'https?://bangumi\.bilibili\.com/anime/(\d+)/play', self.url):
+                re.match(r'https?://bangumi\.bilibili\.com/anime/(\d+)/play', self.url):
             initial_state_text = match1(html_content, r'__INITIAL_STATE__=(.*?);\(function\(\)')  # FIXME
             initial_state = json.loads(initial_state_text)
             ep_id = initial_state['epList'][0]['id']
@@ -458,9 +459,9 @@ class Bilibili(VideoExtractor):
             self.streams[container] = {'container': container,
                                        'size': size, 'src': urls}
 
-    def prepare_by_cid(self,avid,cid,title,html_content,playinfo,playinfo_,url):
-        #response for interaction video
-        #主要针对互动视频，使用cid而不是url来相互区分
+    def prepare_by_cid(self, avid, cid, title, html_content, playinfo, playinfo_, url):
+        # response for interaction video
+        # 主要针对互动视频，使用cid而不是url来相互区分
 
         self.stream_qualities = {s['quality']: s for s in self.stream_types}
         self.title = title
@@ -581,7 +582,7 @@ class Bilibili(VideoExtractor):
         elif match1(html_content, r'<meta property="og:url" content="(https://www.bilibili.com/bangumi/play/[^"]+)"'):
             sort = 'bangumi'
         elif re.match(r'https?://(www\.)?bilibili\.com/bangumi/media/md(\d+)', self.url) or \
-            re.match(r'https?://bangumi\.bilibili\.com/anime/(\d+)', self.url):
+                re.match(r'https?://bangumi\.bilibili\.com/anime/(\d+)', self.url):
             sort = 'bangumi_md'
         elif re.match(r'https?://(www\.)?bilibili\.com/video/(av(\d+)|BV(\S+))', self.url):
             sort = 'video'
@@ -603,15 +604,16 @@ class Bilibili(VideoExtractor):
             initial_state = json.loads(initial_state_text)
             aid = initial_state['videoData']['aid']
             pn = initial_state['videoData']['videos']
-            if pn!= len(initial_state['videoData']['pages']):#interaction video 互动视频
+            if pn != len(initial_state['videoData']['pages']):  # interaction video 互动视频
                 search_node_list = []
                 download_cid_set = set([initial_state['videoData']['cid']])
                 params = {
-                        'id': 'cid:{}'.format(initial_state['videoData']['cid']),
-                        'aid': str(aid)
+                    'id': 'cid:{}'.format(initial_state['videoData']['cid']),
+                    'aid': str(aid)
                 }
-                urlcontent = get_content('https://api.bilibili.com/x/player.so?'+parse.urlencode(params), headers=self.bilibili_headers(referer='https://www.bilibili.com/video/av{}'.format(aid)))
-                graph_version = json.loads(urlcontent[urlcontent.find('<interaction>')+13:urlcontent.find('</interaction>')])['graph_version']
+                urlcontent = get_content('https://api.bilibili.com/x/player.so?' + parse.urlencode(params),
+                                         headers=self.bilibili_headers(referer='https://www.bilibili.com/video/av{}'.format(aid)))
+                graph_version = json.loads(urlcontent[urlcontent.find('<interaction>') + 13:urlcontent.find('</interaction>')])['graph_version']
                 params = {
                     'aid': str(aid),
                     'graph_version': graph_version,
@@ -619,7 +621,7 @@ class Bilibili(VideoExtractor):
                     'portal': 0,
                     'screen': 0,
                 }
-                node_info = json.loads(get_content('https://api.bilibili.com/x/stein/nodeinfo?'+parse.urlencode(params)))
+                node_info = json.loads(get_content('https://api.bilibili.com/x/stein/nodeinfo?' + parse.urlencode(params)))
 
                 playinfo_text = match1(html_content, r'__playinfo__=(.*?)</script><script>')  # FIXME
                 playinfo = json.loads(playinfo_text) if playinfo_text else None
@@ -628,30 +630,38 @@ class Bilibili(VideoExtractor):
                 playinfo_text_ = match1(html_content_, r'__playinfo__=(.*?)</script><script>')  # FIXME
                 playinfo_ = json.loads(playinfo_text_) if playinfo_text_ else None
 
-                self.prepare_by_cid(aid, initial_state['videoData']['cid'], initial_state['videoData']['title'] + ('P{}. {}'.format(1, node_info['data']['title'])),html_content,playinfo,playinfo_,url)
+                self.prepare_by_cid(aid, initial_state['videoData']['cid'],
+                                    initial_state['videoData']['title'] + ('P{}. {}'.format(1, node_info['data']['title'])), html_content, playinfo, playinfo_,
+                                    url)
                 self.extract(**kwargs)
                 self.download(**kwargs)
                 for choice in node_info['data']['edges']['choices']:
                     search_node_list.append(choice['node_id'])
                     if not choice['cid'] in download_cid_set:
                         download_cid_set.add(choice['cid'])
-                        self.prepare_by_cid(aid,choice['cid'],initial_state['videoData']['title']+('P{}. {}'.format(len(download_cid_set),choice['option'])),html_content,playinfo,playinfo_,url)
+                        self.prepare_by_cid(aid, choice['cid'],
+                                            initial_state['videoData']['title'] + ('P{}. {}'.format(len(download_cid_set), choice['option'])), html_content,
+                                            playinfo, playinfo_, url)
                         self.extract(**kwargs)
                         self.download(**kwargs)
-                while len(search_node_list)>0:
+                while len(search_node_list) > 0:
                     node_id = search_node_list.pop(0)
-                    params.update({'node_id':node_id})
-                    node_info = json.loads(get_content('https://api.bilibili.com/x/stein/nodeinfo?'+parse.urlencode(params)))
+                    params.update({'node_id': node_id})
+                    node_info = json.loads(get_content('https://api.bilibili.com/x/stein/nodeinfo?' + parse.urlencode(params)))
                     if node_info['data'].__contains__('edges'):
                         for choice in node_info['data']['edges']['choices']:
                             search_node_list.append(choice['node_id'])
                             if not choice['cid'] in download_cid_set:
                                 download_cid_set.add(choice['cid'])
-                                self.prepare_by_cid(aid,choice['cid'],initial_state['videoData']['title']+('P{}. {}'.format(len(download_cid_set),choice['option'])),html_content,playinfo,playinfo_,url)
+                                self.prepare_by_cid(aid, choice['cid'],
+                                                    initial_state['videoData']['title'] + ('P{}. {}'.format(len(download_cid_set), choice['option'])),
+                                                    html_content, playinfo, playinfo_, url)
                                 try:
-                                    self.streams_sorted = [dict([('id', stream_type['id'])] + list(self.streams[stream_type['id']].items())) for stream_type in self.__class__.stream_types if stream_type['id'] in self.streams]
+                                    self.streams_sorted = [dict([('id', stream_type['id'])] + list(self.streams[stream_type['id']].items())) for stream_type in
+                                                           self.__class__.stream_types if stream_type['id'] in self.streams]
                                 except:
-                                    self.streams_sorted = [dict([('itag', stream_type['itag'])] + list(self.streams[stream_type['itag']].items())) for stream_type in self.__class__.stream_types if stream_type['itag'] in self.streams]
+                                    self.streams_sorted = [dict([('itag', stream_type['itag'])] + list(self.streams[stream_type['itag']].items())) for
+                                                           stream_type in self.__class__.stream_types if stream_type['itag'] in self.streams]
                                 self.extract(**kwargs)
                                 self.download(**kwargs)
             else:
@@ -661,13 +671,17 @@ class Bilibili(VideoExtractor):
                 html_content_ = get_content(self.url, headers=self.bilibili_headers(cookie='CURRENT_FNVAL=16'))
                 playinfo_text_ = match1(html_content_, r'__playinfo__=(.*?)</script><script>')  # FIXME
                 playinfo_ = json.loads(playinfo_text_) if playinfo_text_ else None
-                p = int(match1(self.url, r'[\?&]p=(\d+)') or match1(self.url, r'/index_(\d+)') or '1')-1
-                for pi in range(p,pn):
-                    self.prepare_by_cid(aid,initial_state['videoData']['pages'][pi]['cid'],'%s (P%s. %s)' % (initial_state['videoData']['title'], pi+1, initial_state['videoData']['pages'][pi]['part']),html_content,playinfo,playinfo_,url)
+                p = int(match1(self.url, r'[\?&]p=(\d+)') or match1(self.url, r'/index_(\d+)') or '1') - 1
+                for pi in range(p, pn):
+                    self.prepare_by_cid(aid, initial_state['videoData']['pages'][pi]['cid'],
+                                        '%s (P%s. %s)' % (initial_state['videoData']['title'], pi + 1, initial_state['videoData']['pages'][pi]['part']),
+                                        html_content, playinfo, playinfo_, url)
                     try:
-                        self.streams_sorted = [dict([('id', stream_type['id'])] + list(self.streams[stream_type['id']].items())) for stream_type in self.__class__.stream_types if stream_type['id'] in self.streams]
+                        self.streams_sorted = [dict([('id', stream_type['id'])] + list(self.streams[stream_type['id']].items())) for stream_type in
+                                               self.__class__.stream_types if stream_type['id'] in self.streams]
                     except:
-                        self.streams_sorted = [dict([('itag', stream_type['itag'])] + list(self.streams[stream_type['itag']].items())) for stream_type in self.__class__.stream_types if stream_type['itag'] in self.streams]
+                        self.streams_sorted = [dict([('itag', stream_type['itag'])] + list(self.streams[stream_type['itag']].items())) for stream_type in
+                                               self.__class__.stream_types if stream_type['itag'] in self.streams]
                     self.extract(**kwargs)
                     self.download(**kwargs)
                     # purl = 'https://www.bilibili.com/video/av%s?p=%s' % (aid, pi+1)
@@ -678,7 +692,8 @@ class Bilibili(VideoExtractor):
             initial_state = json.loads(initial_state_text)
             epn, i = len(initial_state['epList']), 0
             for ep in initial_state['epList']:
-                i += 1; log.w('Extracting %s of %s videos ...' % (i, epn))
+                i += 1;
+                log.w('Extracting %s of %s videos ...' % (i, epn))
                 ep_id = ep['id']
                 epurl = 'https://www.bilibili.com/bangumi/play/ep%s/' % ep_id
                 self.__class__().download_by_url(epurl, **kwargs)
@@ -688,7 +703,8 @@ class Bilibili(VideoExtractor):
             initial_state = json.loads(initial_state_text)
             epn, i = len(initial_state['mediaInfo']['episodes']), 0
             for ep in initial_state['mediaInfo']['episodes']:
-                i += 1; log.w('Extracting %s of %s videos ...' % (i, epn))
+                i += 1;
+                log.w('Extracting %s of %s videos ...' % (i, epn))
                 ep_id = ep['ep_id']
                 epurl = 'https://www.bilibili.com/bangumi/play/ep%s/' % ep_id
                 self.__class__().download_by_url(epurl, **kwargs)
@@ -703,7 +719,8 @@ class Bilibili(VideoExtractor):
 
             epn, i = len(channel_info['data']['list']['archives']), 0
             for video in channel_info['data']['list']['archives']:
-                i += 1; log.w('Extracting %s of %s videos ...' % (i, epn))
+                i += 1;
+                log.w('Extracting %s of %s videos ...' % (i, epn))
                 url = 'https://www.bilibili.com/video/av%s' % video['aid']
                 self.__class__().download_playlist_by_url(url, **kwargs)
 
@@ -724,7 +741,8 @@ class Bilibili(VideoExtractor):
 
                 epn, i = len(favlist_info['data']['medias']), 0
                 for video in favlist_info['data']['medias']:
-                    i += 1; log.w('Extracting %s of %s videos ...' % (i, epn))
+                    i += 1;
+                    log.w('Extracting %s of %s videos ...' % (i, epn))
                     url = 'https://www.bilibili.com/video/av%s' % video['id']
                     self.__class__().download_playlist_by_url(url, **kwargs)
 
@@ -743,22 +761,24 @@ class Bilibili(VideoExtractor):
 
                 epn, i = len(videos_info['data']['list']['vlist']), 0
                 for video in videos_info['data']['list']['vlist']:
-                    i += 1; log.w('Extracting %s of %s videos ...' % (i, epn))
+                    i += 1;
+                    log.w('Extracting %s of %s videos ...' % (i, epn))
                     url = 'https://www.bilibili.com/video/av%s' % video['aid']
                     self.__class__().download_playlist_by_url(url, **kwargs)
 
         elif sort == 'audio_menu':
             m = re.match(r'https?://(?:www\.)?bilibili\.com/audio/am(\d+)', self.url)
             sid = m.group(1)
-            #api_url = self.bilibili_audio_menu_info_api(sid)
-            #api_content = get_content(api_url, headers=self.bilibili_headers())
-            #menu_info = json.loads(api_content)
+            # api_url = self.bilibili_audio_menu_info_api(sid)
+            # api_content = get_content(api_url, headers=self.bilibili_headers())
+            # menu_info = json.loads(api_content)
             api_url = self.bilibili_audio_menu_song_api(sid)
             api_content = get_content(api_url, headers=self.bilibili_headers())
             menusong_info = json.loads(api_content)
             epn, i = len(menusong_info['data']['data']), 0
             for song in menusong_info['data']['data']:
-                i += 1; log.w('Extracting %s of %s songs ...' % (i, epn))
+                i += 1;
+                log.w('Extracting %s of %s songs ...' % (i, epn))
                 url = 'https://www.bilibili.com/audio/au%s' % song['id']
                 self.__class__().download_by_url(url, **kwargs)
 

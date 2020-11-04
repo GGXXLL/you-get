@@ -1,24 +1,27 @@
 #!/usr/bin/env python
 
-#__all__ = ['pptv_download', 'pptv_download_by_id']
+# __all__ = ['pptv_download', 'pptv_download_by_id']
+
+import binascii
+import random
+import re
+import time
+
+from xml.dom.minidom import parseString
 
 from ..common import *
 from ..extractor import VideoExtractor
 
-import re
-import time
-import urllib
-import random
-import binascii
-from xml.dom.minidom import parseString
-
 
 def lshift(a, b):
     return (a << b) & 0xffffffff
+
+
 def rshift(a, b):
     if a >= 0:
         return a >> b
     return (0x100000000 + a) >> b
+
 
 def le32_pack(b_str):
     result = 0
@@ -27,6 +30,7 @@ def le32_pack(b_str):
     result |= (b_str[2] << 16)
     result |= (b_str[3] << 24)
     return result
+
 
 def tea_core(data, key_seg):
     delta = 2654435769
@@ -53,22 +57,26 @@ def tea_core(data, key_seg):
 
     return bytes(unpack_le32(d0) + unpack_le32(d1))
 
+
 def ran_hex(size):
     result = []
     for i in range(size):
         result.append(hex(int(15 * random.random()))[2:])
     return ''.join(result)
 
+
 def zpad(b_str, size):
     size_diff = size - len(b_str)
     return b_str + bytes(size_diff)
 
+
 def gen_key(t):
-    key_seg = [1896220160,101056625, 100692230, 7407110]
+    key_seg = [1896220160, 101056625, 100692230, 7407110]
     t_s = hex(int(t))[2:].encode('utf8')
     input_data = zpad(t_s, 16)
     out = tea_core(input_data, key_seg)
     return binascii.hexlify(out[:8]).decode('utf8') + ran_hex(16)
+
 
 def unpack_le32(i32):
     result = []
@@ -81,18 +89,23 @@ def unpack_le32(i32):
     result.append(i32 & 0xff)
     return result
 
+
 def get_elem(elem, tag):
     return elem.getElementsByTagName(tag)
+
 
 def get_attr(elem, attr):
     return elem.getAttribute(attr)
 
+
 def get_text(elem):
     return elem.firstChild.nodeValue
+
 
 def shift_time(time_str):
     ts = time_str[:-4]
     return time.mktime(time.strptime(ts)) - 60
+
 
 def parse_pptv_xml(dom):
     channel = get_elem(dom, 'channel')[0]
@@ -139,7 +152,8 @@ def parse_pptv_xml(dom):
         segs_mlist.append(segs_meta)
     return title, item_mlist, stream_mlist, segs_mlist
 
-#mergs 3 meta_data
+
+# mergs 3 meta_data
 def merge_meta(item_mlist, stream_mlist, segs_mlist):
     streams = {}
     for i in range(len(segs_mlist)):
@@ -178,39 +192,43 @@ def make_url(stream):
         src.append(url)
     return src
 
+
 class PPTV(VideoExtractor):
     name = 'PPTV'
     stream_types = [
-            {'itag': '4'},
-            {'itag': '3'},
-            {'itag': '2'},
-            {'itag': '1'},
-            {'itag': '0'},
+        {'itag': '4'},
+        {'itag': '3'},
+        {'itag': '2'},
+        {'itag': '1'},
+        {'itag': '0'},
     ]
 
     def prepare(self, **kwargs):
         if self.url and not self.vid:
             if not re.match(r'https?://v.pptv.com/show/(\w+)\.html', self.url):
-                raise('Unknown url pattern')
-            page_content = get_content(self.url,{"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36"})
+                raise ('Unknown url pattern')
+            page_content = get_content(self.url, {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36"})
             self.vid = match1(page_content, r'webcfg\s*=\s*{"id":\s*(\d+)')
 
         if not self.vid:
-            raise('Cannot find id')
+            raise ('Cannot find id')
         api_url = 'http://web-play.pptv.com/webplay3-0-{}.xml'.format(self.vid)
         api_url += '?appplt=flp&appid=pptv.flashplayer.vod&appver=3.4.2.28&type=&version=4'
-        dom = parseString(get_content(api_url,{"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36"}))
+        dom = parseString(get_content(api_url, {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36"}))
         self.title, m_items, m_streams, m_segs = parse_pptv_xml(dom)
         xml_streams = merge_meta(m_items, m_streams, m_segs)
         for stream_id in xml_streams:
             stream_data = xml_streams[stream_id]
             src = make_url(stream_data)
             self.streams[stream_id] = {
-                    'container': 'mp4',
-                    'video_profile': stream_data['res'],
-                    'size': int(stream_data['size']),
-                    'src': src
+                'container': 'mp4',
+                'video_profile': stream_data['res'],
+                'size': int(stream_data['size']),
+                'src': src
             }
+
 
 '''
 def constructKey(arg):
@@ -353,7 +371,7 @@ def pptv_download(url, output_dir = '.', merge = True, info_only = False, **kwar
     pptv_download_by_id(id, output_dir = output_dir, merge = merge, info_only = info_only)
 '''
 site = PPTV()
-#site_info = "PPTV.com"
-#download = pptv_download
+# site_info = "PPTV.com"
+# download = pptv_download
 download = site.download_by_url
 download_playlist = playlist_not_supported('pptv')

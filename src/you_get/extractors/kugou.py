@@ -2,11 +2,11 @@
 
 __all__ = ['kugou_download']
 
-from ..common import *
-from json import loads
-from base64 import b64decode
 import re
-import hashlib
+from base64 import b64decode
+from json import loads
+
+from ..common import *
 
 
 def kugou_download(url, output_dir=".", merge=True, info_only=False, **kwargs):

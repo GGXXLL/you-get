@@ -2,8 +2,10 @@
 
 __all__ = ['ted_download']
 
-from ..common import *
 import json
+
+from ..common import *
+
 
 def ted_download(url, output_dir='.', merge=True, info_only=False, **kwargs):
     html = get_html(url)
@@ -19,6 +21,7 @@ def ted_download(url, output_dir='.', merge=True, info_only=False, **kwargs):
             if not info_only:
                 download_urls([url], title, ext, size, output_dir, merge=merge)
             break
+
 
 site_info = "TED.com"
 download = ted_download

@@ -2,13 +2,14 @@
 
 __all__ = ['miomio_download']
 
-from ..common import *
+from xml.dom.minidom import parseString
 
 from .tudou import tudou_download_by_id
 from .youku import youku_download_by_vid
-from xml.dom.minidom import parseString
+from ..common import *
 
-def miomio_download(url, output_dir = '.', merge = True, info_only = False, **kwargs):
+
+def miomio_download(url, output_dir='.', merge=True, info_only=False, **kwargs):
     html = get_html(url)
 
     title = r1(r'<meta name="description" content="([^"]*)"', html)
@@ -37,7 +38,8 @@ def miomio_download(url, output_dir = '.', merge = True, info_only = False, **kw
     else:
         raise NotImplementedError(flashvars)
 
-#----------------------------------------------------------------------
+
+# ----------------------------------------------------------------------
 def sina_xml_to_url_list(xml_data):
     """str->list
     Convert XML to URL List.
@@ -49,6 +51,7 @@ def sina_xml_to_url_list(xml_data):
         url = node.getElementsByTagName('url')[0]
         rawurl.append(url.childNodes[0].data)
     return rawurl
+
 
 site_info = "MioMio.tv"
 download = miomio_download

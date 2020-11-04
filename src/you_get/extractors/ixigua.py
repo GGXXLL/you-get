@@ -1,14 +1,12 @@
 #!/usr/bin/env python
 import base64
-
-import binascii
-
-from ..common import *
+import ctypes
 import random
 import string
-import ctypes
 from json import loads
 from urllib import request
+
+from ..common import *
 
 __all__ = ['ixigua_download', 'ixigua_download_playlist_by_url']
 
@@ -95,7 +93,7 @@ def ixigua_download(url, output_dir='.', merge=True, info_only=False, **kwargs):
         log.e("Get window.config from url failed, url: {}".format(url))
         return
     verify_url = conf['prefix'] + conf['url'] + '?key=' + conf['key'] + '&psm=' + conf['psm'] \
-        + '&_signature=' + ''.join(random.sample(string.ascii_letters + string.digits, 31))
+                 + '&_signature=' + ''.join(random.sample(string.ascii_letters + string.digits, 31))
     try:
         ok = get_content(verify_url)
     except Exception as e:
@@ -127,7 +125,7 @@ def ixigua_download(url, output_dir='.', merge=True, info_only=False, **kwargs):
         log.e("Get video info from {} error: The server returns JSON value"
               " without data.video_list.video_1 or data.video_list.video_1 is empty".format(video_info_url))
         return
-    bestQualityVideo = list(video_info["data"]["video_list"].keys())[-1] #There is not only video_1, there might be video_2
+    bestQualityVideo = list(video_info["data"]["video_list"].keys())[-1]  # There is not only video_1, there might be video_2
     size = int(video_info["data"]["video_list"][bestQualityVideo]["size"])
     print_info(site_info=site_info, title=title, type="mp4", size=size)  # 该网站只有mp4类型文件
     if not info_only:

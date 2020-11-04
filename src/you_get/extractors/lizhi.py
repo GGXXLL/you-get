@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 
 __all__ = ['lizhi_download']
-import json
+
 import datetime
+import json
+
 from ..common import *
+
 
 #
 # Worked well but not perfect.
@@ -12,6 +15,7 @@ from ..common import *
 def get_url(ep):
     readable = datetime.datetime.fromtimestamp(int(ep['create_time']) / 1000).strftime('%Y/%m/%d')
     return 'http://cdn5.lizhi.fm/audio/{}/{}_hd.mp3'.format(readable, ep['id'])
+
 
 # radio_id: e.g. 549759 from http://www.lizhi.fm/549759/
 #
@@ -34,19 +38,22 @@ def lizhi_extract_playlist_info(radio_id):
     api_response = json.loads(get_content(api_url))
     return [(ep['id'], ep['name'], get_url(ep)) for ep in api_response]
 
+
 def lizhi_download_audio(audio_id, title, url, output_dir='.', info_only=False):
     filetype, ext, size = url_info(url)
     print_info(site_info, title, filetype, size)
     if not info_only:
         download_urls([url], title, ext, size, output_dir=output_dir)
 
+
 def lizhi_download_playlist(url, output_dir='.', info_only=False, **kwargs):
     # Sample URL: http://www.lizhi.fm/549759/
-    radio_id = match1(url,r'/(\d+)')
+    radio_id = match1(url, r'/(\d+)')
     if not radio_id:
         raise NotImplementedError('%s not supported' % url)
     for audio_id, title, url in lizhi_extract_playlist_info(radio_id):
         lizhi_download_audio(audio_id, title, url, output_dir=output_dir, info_only=info_only)
+
 
 def lizhi_download(url, output_dir='.', info_only=False, **kwargs):
     # Sample URL: http://www.lizhi.fm/549759/18864883431656710/
@@ -62,6 +69,7 @@ def lizhi_download(url, output_dir='.', info_only=False, **kwargs):
             break
     else:
         raise NotImplementedError('Audio #%s not found in playlist #%s' % (audio_id, radio_id))
+
 
 site_info = "lizhi.fm"
 download = lizhi_download

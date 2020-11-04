@@ -2,16 +2,17 @@
 
 __all__ = ['douyutv_download']
 
-from ..common import *
-from ..util.log import *
-import json
 import hashlib
-import time
+import json
 import re
+import time
+
+from ..common import *
 
 headers = {
-        'user-agent': 'Mozilla/5.0 (iPad; CPU OS 8_1_3 like Mac OS X) AppleWebKit/600.1.4 (KHTML, like Gecko) Version/8.0 Mobile/12B466 Safari/600.1.4'
-    }
+    'user-agent': 'Mozilla/5.0 (iPad; CPU OS 8_1_3 like Mac OS X) AppleWebKit/600.1.4 (KHTML, like Gecko) Version/8.0 Mobile/12B466 Safari/600.1.4'
+}
+
 
 def douyutv_video_download(url, output_dir='.', merge=True, info_only=False, **kwargs):
     ep = 'http://vmobile.douyu.com/video/getInfo?vid='
@@ -45,7 +46,7 @@ def douyutv_download(url, output_dir='.', merge=True, info_only=False, **kwargs)
         douyutv_video_download(url, output_dir=output_dir, merge=merge, info_only=info_only, **kwargs)
         return
 
-    url = re.sub(r'.*douyu.com','https://m.douyu.com/room', url)
+    url = re.sub(r'.*douyu.com', 'https://m.douyu.com/room', url)
     html = get_content(url, headers)
     room_id_patt = r'"rid"\s*:\s*(\d+),'
     room_id = match1(html, room_id_patt)

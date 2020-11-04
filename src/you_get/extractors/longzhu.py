@@ -3,6 +3,7 @@
 __all__ = ['longzhu_download']
 
 import json
+
 from ..common import (
     get_content,
     general_m3u8_extractor,
@@ -13,14 +14,15 @@ from ..common import (
 )
 from ..common import player
 
-def longzhu_download(url, output_dir = '.', merge=True, info_only=False, **kwargs):
+
+def longzhu_download(url, output_dir='.', merge=True, info_only=False, **kwargs):
     web_domain = url.split('/')[2]
     if (web_domain == 'star.longzhu.com') or (web_domain == 'y.longzhu.com'):
         domain = url.split('/')[3].split('?')[0]
         m_url = 'http://m.longzhu.com/{0}'.format(domain)
         m_html = get_content(m_url)
         room_id_patt = r'var\s*roomId\s*=\s*(\d+);'
-        room_id = match1(m_html,room_id_patt)
+        room_id = match1(m_html, room_id_patt)
 
         json_url = 'http://liveapi.plu.cn/liveapp/roomstatus?roomId={0}'.format(room_id)
         content = get_content(json_url)
@@ -30,7 +32,7 @@ def longzhu_download(url, output_dir = '.', merge=True, info_only=False, **kwarg
             raise ValueError('The live stream is not online!')
         title = data['title']
         streamer = data['userName']
-        title = str.format(streamer,': ',title)
+        title = str.format(streamer, ': ', title)
 
         steam_api_url = 'http://livestream.plu.cn/live/getlivePlayurl?roomId={0}'.format(room_id)
         content = get_content(steam_api_url)
@@ -54,7 +56,7 @@ def longzhu_download(url, output_dir = '.', merge=True, info_only=False, **kwarg
 
         username = data['userName']
         title = data['title']
-        title = str.format(username,':',title)
+        title = str.format(username, ':', title)
         real_url = data['videoUrl']
 
         if player:
@@ -68,6 +70,7 @@ def longzhu_download(url, output_dir = '.', merge=True, info_only=False, **kwarg
 
     else:
         raise ValueError('Wrong url or unsupported link ... {0}'.format(url))
+
 
 site_info = 'longzhu.com'
 download = longzhu_download

@@ -1,13 +1,11 @@
 #!/usr/bin/env python
 
-import urllib.request
-import urllib.parse
 import json
 import re
 
-from ..util import log
-from ..common import get_content, download_urls, print_info, playlist_not_supported, url_size
 from .universal import *
+from ..common import get_content, download_urls, print_info, playlist_not_supported, url_size
+from ..util import log
 
 __all__ = ['naver_download_by_url']
 
@@ -34,6 +32,7 @@ def naver_download_by_url(url, output_dir='.', merge=True, info_only=False, **kw
             download_urls([video_url], title, 'mp4', size, output_dir, **kwargs)
     except:
         universal_download(url, output_dir, merge=merge, info_only=info_only, **kwargs)
+
 
 site_info = "naver.com"
 download = naver_download_by_url

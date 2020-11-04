@@ -30,7 +30,7 @@ from ..common import get_content, urls_size, log, player, dry_run
 from ..extractor import VideoExtractor
 
 _UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 ' \
-       '(KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36'
+      '(KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36'
 
 
 class _NoMatchException(Exception):
@@ -51,9 +51,11 @@ class _Dispatcher(object):
 
     def endpoint(self, *patterns):
         assert patterns, 'patterns must not be empty'
+
         def _wrap(fun):
             self.register(patterns, fun)
             return fun
+
         return _wrap
 
     def test(self, url):
@@ -74,6 +76,7 @@ class _Dispatcher(object):
 
         raise _NoMatchException()
 
+
 missevan_stream_types = [
     {'id': 'source', 'quality': '源文件', 'url_json_key': 'soundurl',
      'resource_url_fmt': 'sound/{resource_url}'},
@@ -88,6 +91,7 @@ missevan_stream_types = [
      'resource_url_fmt': 'coversmini/{resource_url}'}
 ]
 
+
 def _get_resource_uri(data, stream_type):
     uri = data[stream_type['url_json_key']]
     if not uri:
@@ -98,9 +102,11 @@ def _get_resource_uri(data, stream_type):
         return uri
     return uri_fmt.format(resource_url=uri)
 
+
 def is_covers_stream(stream):
     stream = stream or ''
     return stream.lower() in ('covers', 'coversmini')
+
 
 def get_file_extension(file_path, default=''):
     _, suffix = os.path.splitext(file_path)
@@ -108,6 +114,7 @@ def get_file_extension(file_path, default=''):
         # remove dot
         suffix = suffix[1:]
     return suffix or default
+
 
 def best_quality_stream_id(streams, stream_types):
     for stream_type in stream_types:
@@ -118,7 +125,6 @@ def best_quality_stream_id(streams, stream_types):
 
 
 class MissEvanWithStream(VideoExtractor):
-
     name = 'MissEvan'
     stream_types = missevan_stream_types
 
@@ -168,7 +174,6 @@ class MissEvanWithStream(VideoExtractor):
 
 
 class MissEvan(VideoExtractor):
-
     name = 'MissEvan'
     stream_types = missevan_stream_types
 
@@ -302,7 +307,7 @@ class MissEvan(VideoExtractor):
             super().download_by_url(url, **kwargs)
 
     def download(self, **kwargs):
-        kwargs['keep_obj'] = True   # keep the self.streams to download cover
+        kwargs['keep_obj'] = True  # keep the self.streams to download cover
         super().download(**kwargs)
         self.download_covers(self.title, self.streams, **kwargs)
 
@@ -354,6 +359,7 @@ class MissEvan(VideoExtractor):
     @staticmethod
     def url_resource(uri):
         return 'https://static.missevan.com/' + uri
+
 
 site = MissEvan()
 site_info = 'MissEvan.com'

@@ -3,6 +3,7 @@
 from ..common import *
 from ..extractor import VideoExtractor
 
+
 class Pinterest(VideoExtractor):
     # site name
     name = "Pinterest"
@@ -10,7 +11,7 @@ class Pinterest(VideoExtractor):
     # ordered list of supported stream types / qualities on this site
     # order: high quality -> low quality
     stream_types = [
-        {'id': 'original'}, # contains an 'id' or 'itag' field at minimum
+        {'id': 'original'},  # contains an 'id' or 'itag' field at minimum
         {'id': 'small'},
     ]
 
@@ -24,7 +25,7 @@ class Pinterest(VideoExtractor):
 
         # extract raw urls
         orig_img = match1(content,
-                         r'<meta itemprop="image" content="([^"]+/originals/[^"]+)"')
+                          r'<meta itemprop="image" content="([^"]+/originals/[^"]+)"')
         twit_img = match1(content,
                           r'<meta property="twitter:image:src" name="twitter:image:src" content="([^"]+)"')
 
@@ -41,6 +42,7 @@ class Pinterest(VideoExtractor):
             # 'src' field is a list of processed urls for direct downloading
             # usually derived from 'url'
             s['src'] = [s['url']]
+
 
 site = Pinterest()
 download = site.download_by_url
